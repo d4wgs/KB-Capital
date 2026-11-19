@@ -1,0 +1,93 @@
+[
+ {
+  "time": "2026-11-19T04:12:59Z",
+  "type": "TRADE",
+  "side": "SELL",
+  "title": "Anthropic IPO closing market cap above $1.1T?",
+  "slug": "anthropic-ipo-closing-market-cap-above-1pt1t",
+  "event_slug": "anthropic-ipo-closing-market-cap-above",
+  "outcome": "Yes",
+  "shares": 167.53,
+  "usdc": 164.51446,
+  "price": 0.982,
+  "tx": "0x1230e9296592581f7f95d3988e1109f6a215dcb95fee8a56ba997dc6f8096206"
+ },
+ {
+  "time": "2026-11-19T02:40:13Z",
+  "type": "TRADE",
+  "side": "BUY",
+  "title": "Anthropic IPO closing market cap above $1.1T?",
+  "slug": "anthropic-ipo-closing-market-cap-above-1pt1t",
+  "event_slug": "anthropic-ipo-closing-market-cap-above",
+  "outcome": "Yes",
+  "shares": 40.08,
+  "usdc": 38.11351,
+  "price": 0.949,
+  "tx": "0xd3de7a2b94e0bf8c6a1def4c448325dfa0babf62a38179a35b087c8da43e374b"
+ },
+ {
+  "time": "2026-11-19T02:39:31Z",
+  "type": "TRADE",
+  "side": "BUY",
+  "title": "Anthropic IPO closing market cap above $1.1T?",
+  "slug": "anthropic-ipo-closing-market-cap-above-1pt1t",
+  "event_slug": "anthropic-ipo-closing-market-cap-above",
+  "outcome": "Yes",
+  "shares": 127.45,
+  "usdc": 121.00116,
+  "price": 0.9474080031,
+  "tx": "0xd751e41150b4f3f2d423c08046bf41c3adde1dda4d13a09d1b76ac8f8769a302"
+ },
+ {
+  "time": "2026-11-17T04:12:04Z",
+  "type": "TRADE",
+  "side": "SELL",
+  "title": "Will Elon Musk post 280-299 tweets from November 10 to November 17, 2026?",
+  "slug": "elon-musk-of-tweets-november-10-november-17-2026-280-299",
+  "event_slug": "elon-musk-of-tweets-november-10-november-17-2026",
+  "outcome": "Yes",
+  "shares": 30.0,
+  "usdc": 18.0,
+  "price": 0.6,
+  "tx": "0xc1efa8afaacb688f623e3d44e61abc48920ac289d400b8fa268f1a4bc83cedc0"
+ },
+ {
+  "time": "2026-11-17T03:24:13Z",
+  "type": "TRADE",
+  "side": "SELL",
+  "title": "Canadiens vs. Rangers",
+  "slug": "nhl-mon-nyr-2026-11-16",
+  "event_slug": "nhl-mon-nyr-2026-11-16",
+  "outcome": "Rangers",
+  "shares": 102.18,
+  "usdc": 101.1582,
+  "price": 0.99,
+  "tx": "0xecc684a76e20bcc7f98e16bfb961099971f146422749e0a583d1fc778977d2e9"
+ },
+ {
+  "time": "2026-11-17T03:20:47Z",
+  "type": "TRADE",
+  "side": "BUY",
+  "title": "Canadiens vs. Rangers",
+  "slug": "nhl-mon-nyr-2026-11-16",
+  "event_slug": "nhl-mon-nyr-2026-11-16",
+  "outcome": "Rangers",
+  "shares": 102.1897,
+  "usdc": 100.107096,
+  "price": 0.9785717739,
+  "tx": "0x98d3dccda8e600c2aa721d5831fe5db38828a3857b9d4efdde2667a756b50ff6"
+ },
+ {
+  "time": "2026-11-17T02:05:29Z",
+  "type": "TRADE",
+  "side": "BUY",
+  "title": "Will Elon Musk post 280-299 tweets from November 10 to November 17, 2026?",
+  "slug": "elon-musk-of-tweets-november-10-november-17-2026-280-299",
+  "event_slug": "elon-musk-of-tweets-november-10-november-17-2026",
+  "outcome": "Yes",
+  "shares": 30.0,
+  "usdc": 15.48,
+  "price": 0.516,
+  "tx": "0x18843c5f2803388d15a01a28a7fc7b5b47392fbd78a25c515262533e93117ad5"
+ }
+]

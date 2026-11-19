@@ -1,267 +1,633 @@
-/* KB Capital — live New York clock and NYSE session status.
-   No network calls: everything is computed in the browser. */
+/* KB Capital: Polymarket-style portfolio page.
+   Reads the JSON files in /data (refreshed by scripts/update.py) and draws the page.
+   Market details are fetched from Polymarket's public Gamma API when a row is opened. */
 
 (function () {
   "use strict";
 
-  /* ---- Settings you can edit ---- */
+  var PAGE = 25;
+  var GAMMA = "https://gamma-api.polymarket.com/markets";
 
-  // Leave blank to hide the Contact section. Example: "contact@kbcap.fund"
-  var CONTACT_EMAIL = "";
+  /* ---------- helpers ---------- */
 
-  /* ---- NYSE calendar ----
-     Regular session: 9:30 AM to 4:00 PM New York time, Monday to Friday.
-     Holidays and early closes (1:00 PM) are listed by year. Verify against
-     https://www.nyse.com/markets/hours-calendars and add the next year before
-     January. For a year that is not listed, the page shows the clock only and
-     makes no open/closed claim. */
+  function $(id) { return document.getElementById(id); }
+  function isNum(x) { return typeof x === "number" && isFinite(x); }
 
-  var TZ = "America/New_York";
-  var OPEN = { h: 9, m: 30 };
-  var CLOSE = { h: 16, m: 0 };
-  var EARLY = { h: 13, m: 0 };
-
-  var HOLIDAYS = [
-    // 2026
-    "2026-01-01", "2026-01-19", "2026-02-16", "2026-04-03", "2026-05-25",
-    "2026-06-19", "2026-07-03", "2026-09-07", "2026-11-26", "2026-12-25",
-    // 2027
-    "2027-01-01", "2027-01-18", "2027-02-15", "2027-03-26", "2027-05-31",
-    "2027-06-18", "2027-07-05", "2027-09-06", "2027-11-25", "2027-12-24"
-  ];
-  var EARLY_CLOSES = ["2026-11-27", "2026-12-24", "2027-11-26"];
-  var COVERED_YEARS = [2026, 2027];
-
-  var holidaySet = new Set(HOLIDAYS);
-  var earlySet = new Set(EARLY_CLOSES);
-
-  /* ---- Time helpers ---- */
-
-  var partsFormat = new Intl.DateTimeFormat("en-US", {
-    timeZone: TZ,
-    hourCycle: "h23",
-    year: "numeric",
-    month: "2-digit",
-    day: "2-digit",
-    hour: "2-digit",
-    minute: "2-digit",
-    second: "2-digit"
-  });
-
-  function pad(n) {
-    return n < 10 ? "0" + n : String(n);
-  }
-
-  // Wall-clock parts in New York for a UTC timestamp (ms).
-  function etParts(ms) {
-    var o = {};
-    partsFormat.formatToParts(new Date(ms)).forEach(function (p) {
-      o[p.type] = p.value;
+  function get(url) {
+    return fetch(url + "?v=" + Date.now(), { cache: "no-store" }).then(function (r) {
+      if (!r.ok) throw new Error(url + " " + r.status);
+      return r.json();
     });
-    return {
-      y: +o.year,
-      mo: +o.month,
-      d: +o.day,
-      h: +o.hour % 24,
-      mi: +o.minute,
-      s: +o.second
-    };
   }
 
-  // New York's offset from UTC at a given instant, in ms (negative).
-  function offsetMs(ms) {
-    var p = etParts(ms);
-    return Date.UTC(p.y, p.mo - 1, p.d, p.h, p.mi, p.s) - Math.floor(ms / 1000) * 1000;
+  function usd(x, digits) {
+    if (!isNum(x)) return "--";
+    return x.toLocaleString("en-US", {
+      style: "currency", currency: "USD",
+      minimumFractionDigits: digits == null ? 2 : digits,
+      maximumFractionDigits: digits == null ? 2 : digits
+    });
+  }
+  function signedUsd(x) {
+    if (!isNum(x)) return "--";
+    return (x > 0 ? "+" : x < 0 ? "-" : "") + usd(Math.abs(x));
+  }
+  function compact(x) {
+    if (!isNum(x)) return "--";
+    if (x >= 1e6) return "$" + (x / 1e6).toFixed(2) + "M";
+    if (x >= 1e4) return "$" + (x / 1e3).toFixed(1) + "K";
+    return usd(x, 0);
+  }
+  function cents(x) {
+    var n = Number(x);
+    return x !== null && x !== "" && x !== undefined && isFinite(n) ? (Math.round(n * 1000) / 10) + "¢" : "--";
+  }
+  function shares(x) { return isNum(x) ? x.toLocaleString("en-US", { maximumFractionDigits: 1 }) : "--"; }
+  function cls(x) { return !isNum(x) || x === 0 ? "" : x > 0 ? "pos" : "neg"; }
+
+  function el(tag, props, children) {
+    var n = document.createElement(tag);
+    Object.keys(props || {}).forEach(function (k) {
+      if (k === "text") n.textContent = props[k];
+      else if (k === "class") n.className = props[k];
+      else n.setAttribute(k, props[k]);
+    });
+    (children || []).forEach(function (c) { if (c) n.appendChild(c); });
+    return n;
   }
 
-  // The UTC timestamp of a New York wall-clock time.
-  function etToUtc(y, mo, d, h, mi) {
-    var guess = Date.UTC(y, mo - 1, d, h, mi);
-    return guess - offsetMs(guess);
+  var dateFmt = new Intl.DateTimeFormat("en-US", { month: "short", day: "numeric", year: "numeric" });
+  var dateTimeFmt = new Intl.DateTimeFormat("en-US", { month: "short", day: "numeric", hour: "numeric", minute: "2-digit" });
+  var monthFmt = new Intl.DateTimeFormat("en-US", { month: "short", year: "numeric" });
+  var hourFmt = new Intl.DateTimeFormat("en-US", { hour: "numeric", minute: "2-digit" });
+
+  function d(s) { return s ? dateFmt.format(new Date(s.length === 10 ? s + "T12:00:00" : s)) : "--"; }
+  function dt(s) { return s ? dateTimeFmt.format(new Date(s)) : "--"; }
+
+  function ago(s) {
+    var mins = Math.max(0, Math.round((Date.now() - new Date(s).getTime()) / 60000));
+    if (mins < 1) return "just now";
+    if (mins < 60) return mins + "m ago";
+    var h = Math.round(mins / 60);
+    if (h < 48) return h + "h ago";
+    return Math.round(h / 24) + "d ago";
   }
 
-  function dayKey(y, mo, d) {
-    return y + "-" + pad(mo) + "-" + pad(d);
+  function validSlug(s) { return typeof s === "string" && /^[a-z0-9-]+$/i.test(s); }
+  function marketUrl(row) {
+    var s = row.event_slug || row.slug;
+    return validSlug(s) ? "https://polymarket.com/event/" + s : null;
+  }
+  function safeImg(u) { return typeof u === "string" && /^https:\/\/[^\s"')]+$/.test(u) ? u : null; }
+
+  /* ---------- state ---------- */
+
+  var S = {
+    summary: null, positions: [], closed: [], activity: [], pnl: null,
+    view: "positions", status: "active", q: "", sort: { active: "value", closed: "recent" },
+    shownPos: PAGE, shownAct: PAGE, range: "1d",
+    market: {} // slug -> gamma market (or null)
+  };
+
+  /* ---------- profile card ---------- */
+
+  function renderSummary(s) {
+    S.summary = s;
+    var m = s.metrics || {};
+    $("s-positions").textContent = usd(s.positions_value);
+    $("s-best").textContent = isNum(m.best) && m.best > 0 ? usd(m.best) : "--";
+    $("s-markets").textContent = isNum(m.markets_traded) ? String(m.markets_traded) : "--";
+    $("s-volume").textContent = isNum(m.volume_usdc) ? usd(m.volume_usdc) : "--";
+    $("s-cash").textContent = usd(s.cash);
+    renderTotalPnl();
+    if (s.wallet) $("meta").textContent = "Joined Nov 2026 · " + s.wallet.slice(0, 6) + "…" + s.wallet.slice(-4);
+    $("updated").textContent = s.updated ? "Data updated " + ago(s.updated) + " (" + dt(s.updated) + ")." : "";
   }
 
-  function isTradingDay(y, mo, d) {
-    var dow = new Date(Date.UTC(y, mo - 1, d)).getUTCDay();
-    if (dow === 0 || dow === 6) return false;
-    return !holidaySet.has(dayKey(y, mo, d));
+  function renderTotalPnl() {
+    var n = $("s-pnl");
+    var v = null;
+    if (S.pnl && S.pnl.all && S.pnl.all.length) v = S.pnl.all[S.pnl.all.length - 1].pnl;
+    else if (S.summary && S.summary.metrics) v = S.summary.metrics.total_pnl;
+    n.textContent = signedUsd(v);
+    n.className = cls(v);
   }
 
-  // Open and close timestamps for one New York calendar day, or null.
-  function sessionFor(y, mo, d) {
-    if (!isTradingDay(y, mo, d)) return null;
-    var close = earlySet.has(dayKey(y, mo, d)) ? EARLY : CLOSE;
-    return {
-      open: etToUtc(y, mo, d, OPEN.h, OPEN.m),
-      close: etToUtc(y, mo, d, close.h, close.m),
-      early: close === EARLY
-    };
+  /* ---------- P&L chart ---------- */
+
+  var NS = "http://www.w3.org/2000/svg";
+  function svg(tag, attrs) {
+    var n = document.createElementNS(NS, tag);
+    Object.keys(attrs || {}).forEach(function (k) { n.setAttribute(k, attrs[k]); });
+    return n;
   }
 
-  // Is the NYSE open now, and when does that next change?
-  function marketState(nowMs) {
-    var p = etParts(nowMs);
-    if (COVERED_YEARS.indexOf(p.y) === -1) return { known: false };
+  // Span of each range (for the empty-state line) and how its points are spaced.
+  var RANGE_MS = { "1h": 36e5, "12h": 12 * 36e5, "1d": 864e5, "1w": 7 * 864e5, "1m": 30 * 864e5 };
+  var LABELS = { "1h": "Past hour · minute by minute", "12h": "Past 12 hours · hour by hour", "1d": "Past 24 hours · hour by hour", "1w": "Past week · day by day", "1m": "Past month · day by day", "all": "All time · day by day" };
 
-    var base = Date.UTC(p.y, p.mo - 1, p.d);
-    for (var i = 0; i < 12; i++) {
-      var day = new Date(base + i * 86400000);
-      var y = day.getUTCFullYear();
-      if (COVERED_YEARS.indexOf(y) === -1) return { known: false };
-      var s = sessionFor(y, day.getUTCMonth() + 1, day.getUTCDate());
-      if (s && nowMs < s.close) {
-        if (nowMs >= s.open) {
-          return { known: true, open: true, closesAt: s.close, early: s.early };
-        }
-        return { known: true, open: false, opensAt: s.open };
+  function seriesFor(range) {
+    var raw = (S.pnl && S.pnl[range]) || [];
+    var end = S.summary && S.summary.updated ? new Date(S.summary.updated).getTime() : Date.now();
+    var pts = raw
+      .filter(function (p) { return isNum(p.t) && isNum(p.pnl); })
+      .map(function (p) { return { t: p.t * 1000, v: p.pnl }; })
+      .sort(function (a, b) { return a.t - b.t; });
+    // Carry the latest value forward to the moment the data was refreshed, so the line isn't cut short.
+    if (pts.length && end > pts[pts.length - 1].t) pts.push({ t: end, v: pts[pts.length - 1].v });
+    if (range === "all") {
+      // All-time P&L starts at zero when the account does.
+      if (pts.length && pts[0].v !== 0) pts.unshift({ t: pts[0].t - 36e5, v: 0 });
+    } else if (pts.length) {
+      // Other ranges show the change over the period.
+      var base = pts[0].v;
+      pts = pts.map(function (p) { return { t: p.t, v: p.v - base }; });
+    }
+    if (pts.length < 2) {
+      var span = RANGE_MS[range] || 7 * 864e5;
+      pts = [{ t: end - span, v: 0 }, { t: end, v: 0 }];
+    }
+    return pts;
+  }
+
+  // Monotone cubic interpolation so the curve never overshoots the data.
+  function smoothPath(xs, ys) {
+    var n = xs.length, i;
+    if (n < 3) return xs.map(function (x, k) { return (k ? "L" : "M") + x.toFixed(1) + " " + ys[k].toFixed(1); }).join(" ");
+    var dx = [], m = [], t = new Array(n);
+    for (i = 0; i < n - 1; i++) { dx[i] = xs[i + 1] - xs[i]; m[i] = (ys[i + 1] - ys[i]) / (dx[i] || 1); }
+    t[0] = m[0]; t[n - 1] = m[n - 2];
+    for (i = 1; i < n - 1; i++) t[i] = m[i - 1] * m[i] <= 0 ? 0 : (m[i - 1] + m[i]) / 2;
+    for (i = 0; i < n - 1; i++) {
+      if (m[i] === 0) { t[i] = 0; t[i + 1] = 0; continue; }
+      var a = t[i] / m[i], b = t[i + 1] / m[i], s = a * a + b * b;
+      if (s > 9) { var k = 3 / Math.sqrt(s); t[i] = k * a * m[i]; t[i + 1] = k * b * m[i]; }
+    }
+    var p = "M" + xs[0].toFixed(1) + " " + ys[0].toFixed(1);
+    for (i = 0; i < n - 1; i++) {
+      var h = dx[i] / 3;
+      p += " C" + (xs[i] + h).toFixed(1) + " " + (ys[i] + t[i] * h).toFixed(1) + " " +
+        (xs[i + 1] - h).toFixed(1) + " " + (ys[i + 1] - t[i + 1] * h).toFixed(1) + " " +
+        xs[i + 1].toFixed(1) + " " + ys[i + 1].toFixed(1);
+    }
+    return p;
+  }
+
+  function renderPnl() {
+    var box = $("pl-chart");
+    box.textContent = "";
+    var pts = seriesFor(S.range);
+    var last = pts[pts.length - 1].v;
+
+    $("pl-value").textContent = usd(last);
+    var arrow = $("pl-arrow");
+    arrow.textContent = last < 0 ? "▼" : "▲";
+    arrow.className = "arrow" + (last < 0 ? " down" : "");
+    var label = LABELS[S.range];
+    var asOf = S.summary && S.summary.updated ? " · as of " + dt(S.summary.updated) : "";
+    $("pl-foot").textContent = S.pnl ? label + asOf : "No profit/loss data yet";
+
+    var W = Math.max(200, Math.round(box.clientWidth || 460));
+    var H = Math.max(120, Math.round(box.clientHeight || 160));
+    var T = 12, B = 8;
+    var xs = pts.map(function (p) { return p.t; });
+    var ys = pts.map(function (p) { return p.v; });
+    var x0 = xs[0], x1 = xs[xs.length - 1];
+    var lo = Math.min.apply(null, ys.concat(0)), hi = Math.max.apply(null, ys.concat(0));
+    if (hi === lo) { hi = lo + 1; }
+    var pad = (hi - lo) * 0.08; lo -= pad; hi += pad;
+
+    function X(t) { return x1 === x0 ? 0 : ((t - x0) / (x1 - x0)) * W; }
+    function Y(v) { return T + (1 - (v - lo) / (hi - lo)) * (H - T - B); }
+
+    var root = svg("svg", { viewBox: "0 0 " + W + " " + H, preserveAspectRatio: "none" });
+    var defs = svg("defs");
+    var sg = svg("linearGradient", { id: "plStroke", x1: 0, y1: 0, x2: 1, y2: 0 });
+    sg.appendChild(svg("stop", { offset: "0", "stop-color": "#5b5bf0" }));
+    sg.appendChild(svg("stop", { offset: "1", "stop-color": "#8a4cf0" }));
+    var ag = svg("linearGradient", { id: "plFill", x1: 0, y1: 0, x2: 0, y2: 1 });
+    ag.appendChild(svg("stop", { offset: "0", "stop-color": "#5b5bf0", "stop-opacity": ".22" }));
+    ag.appendChild(svg("stop", { offset: "1", "stop-color": "#5b5bf0", "stop-opacity": "0" }));
+    defs.appendChild(sg); defs.appendChild(ag);
+    root.appendChild(defs);
+
+    var zeroY = Y(0);
+    root.appendChild(svg("line", { class: "zero", x1: 0, x2: W, y1: zeroY, y2: zeroY }));
+
+    var px = xs.map(X), py = ys.map(Y);
+    var path = smoothPath(px, py);
+    root.appendChild(svg("path", { class: "ar", fill: "url(#plFill)", d: path + " L" + W + " " + (H - B) + " L0 " + (H - B) + " Z" }));
+    root.appendChild(svg("path", { class: "ln", d: path, "vector-effect": "non-scaling-stroke" }));
+
+    var hv = svg("line", { class: "hv", y1: T, y2: H - B, x1: 0, x2: 0, visibility: "hidden" });
+    var dot = svg("circle", { class: "dot", r: 5, cx: 0, cy: 0, visibility: "hidden" });
+    root.appendChild(hv); root.appendChild(dot);
+    box.appendChild(root);
+
+    var tip = el("div", { class: "tip" });
+    tip.hidden = true;
+    box.appendChild(tip);
+
+    function move(ev) {
+      var r = root.getBoundingClientRect();
+      var cx = ((ev.clientX - r.left) / r.width) * W;
+      var best = 0;
+      for (var i = 1; i < px.length; i++) if (Math.abs(px[i] - cx) < Math.abs(px[best] - cx)) best = i;
+      hv.setAttribute("x1", px[best]); hv.setAttribute("x2", px[best]); hv.setAttribute("visibility", "visible");
+      dot.setAttribute("cx", px[best]); dot.setAttribute("cy", py[best]); dot.setAttribute("visibility", "visible");
+      var when = new Date(xs[best]);
+      tip.hidden = false;
+      tip.textContent = signedUsd(ys[best]) + " · " + (S.range === "1h" ? hourFmt.format(when) : S.range === "12h" || S.range === "1d" ? dateTimeFmt.format(when) : dateFmt.format(when));
+      var left = (px[best] / W) * r.width;
+      tip.style.left = Math.min(Math.max(left, 80), r.width - 80) + "px";
+    }
+    function leave() { hv.setAttribute("visibility", "hidden"); dot.setAttribute("visibility", "hidden"); tip.hidden = true; }
+    root.addEventListener("pointermove", move);
+    root.addEventListener("pointerleave", leave);
+  }
+
+  /* ---------- market data (Gamma API, best effort) ---------- */
+
+  function parseList(x) {
+    if (Array.isArray(x)) return x;
+    try { var v = JSON.parse(x); return Array.isArray(v) ? v : []; } catch (e) { return []; }
+  }
+
+  function loadMarkets(slugs) {
+    var need = slugs.filter(function (s) { return validSlug(s) && !(s in S.market); });
+    need = need.filter(function (s, i) { return need.indexOf(s) === i; });
+    if (!need.length) return Promise.resolve();
+    need.forEach(function (s) { S.market[s] = null; });
+    var qs = need.map(function (s) { return "slug=" + encodeURIComponent(s); }).join("&");
+    // The API returns open and closed markets separately, so ask for both.
+    function one(extra) {
+      return fetch(GAMMA + "?" + qs + extra + "&limit=" + need.length)
+        .then(function (r) { if (!r.ok) throw new Error(r.status); return r.json(); })
+        .then(function (list) {
+          (list || []).forEach(function (m) { if (m && m.slug) S.market[m.slug] = m; });
+        })
+        .catch(function () { /* offline or blocked: rows still work from local data */ });
+    }
+    return Promise.all([one(""), one("&closed=true")]);
+  }
+
+  function thumb(row) {
+    var m = S.market[row.slug];
+    var img = m && safeImg(m.icon || m.image);
+    var t = el("div", { class: "thumb" });
+    if (img) t.style.backgroundImage = 'url("' + img + '")';
+    else t.textContent = (row.title || "?").charAt(0).toUpperCase();
+    return t;
+  }
+
+  function refreshThumbs() {
+    var hold = [];
+    [S.positions, S.closed, S.activity].forEach(function (l) { l.forEach(function (r) { hold.push(r.slug); }); });
+    return loadMarkets(hold).then(function () { renderList(); });
+  }
+
+  /* ---------- details ---------- */
+
+  function fact(label, value, wide, node) {
+    var dd = el("dd", { text: node ? "" : value });
+    if (node) dd.appendChild(node);
+    return el("div", { class: wide ? "wide" : "" }, [el("dt", { text: label }), dd]);
+  }
+
+  function buildDetail(row, kind) {
+    var wrap = el("div", { class: "detail" });
+    var left = el("div");
+    var right = el("div");
+    wrap.appendChild(left); wrap.appendChild(right);
+
+    var url = marketUrl(row);
+    var head = el("div", { class: "d-head" }, [thumb(row)]);
+    var tt = el("div");
+    var h = el("h3", { text: row.title || "Unknown market" });
+    if (url) {
+      var a = el("a", { href: url, target: "_blank", rel: "noopener noreferrer" }, [h]);
+      tt.appendChild(a);
+    } else tt.appendChild(h);
+    tt.appendChild(el("p", { class: "d-sub", text: "Market data" + (row.end_date ? " · ends " + d(row.end_date) : "") }));
+    head.appendChild(tt);
+    left.appendChild(head);
+
+    var outsBox = el("div", { class: "outs" });
+    var descBox = el("p", { class: "desc" });
+    left.appendChild(outsBox);
+    left.appendChild(descBox);
+
+    var m = S.market[row.slug];
+    function fillMarket(m) {
+      outsBox.textContent = "";
+      var names = parseList(m.outcomes), prices = parseList(m.outcomePrices);
+      names.forEach(function (name, i) {
+        var p = Number(prices[i]);
+        if (!isFinite(p)) return;
+        var mine = row.outcome && name === row.outcome;
+        outsBox.appendChild(el("div", { class: "out" + (mine ? " mine" : "") }, [
+          el("b", { text: name, title: mine ? "Your outcome" : name }),
+          el("div", { class: "bar" }, [el("i", { style: "width:" + Math.max(1, Math.min(100, p * 100)) + "%" })]),
+          el("span", { text: Math.round(p * 100) + "%" })
+        ]));
+      });
+      if (m.description) descBox.textContent = m.description;
+      var more = [];
+      var vol = Number(m.volumeNum != null ? m.volumeNum : m.volume);
+      var liq = Number(m.liquidityNum != null ? m.liquidityNum : m.liquidity);
+      if (isFinite(vol)) more.push(fact("Market volume", compact(vol)));
+      if (isFinite(liq)) more.push(fact("Liquidity", compact(liq)));
+      more.push(fact("Market status", m.closed ? "Closed" : (m.active === false ? "Inactive" : "Open")));
+      if (m.endDate) more.push(fact("Resolves", d(m.endDate)));
+      more.forEach(function (n) { facts.appendChild(n); });
+    }
+
+    var facts = el("dl", { class: "facts" });
+    right.appendChild(facts);
+
+    if (kind === "activity") {
+      facts.appendChild(fact("Action", ((row.side ? row.side + " " : "") + (row.outcome || "") || row.type || "--").trim()));
+      facts.appendChild(fact("Time", dt(row.time)));
+      if (row.shares) facts.appendChild(fact("Shares", shares(row.shares)));
+      if (row.price !== null && row.price !== undefined && row.price !== "") facts.appendChild(fact("Price", cents(row.price)));
+      if (row.usdc) facts.appendChild(fact("Amount", usd(row.usdc)));
+      if (typeof row.tx === "string" && /^0x[0-9a-fA-F]{64}$/.test(row.tx)) {
+        facts.appendChild(fact("Transaction", "", true, el("a", { href: "https://polygonscan.com/tx/" + row.tx, target: "_blank", rel: "noopener noreferrer", text: row.tx.slice(0, 10) + "…" + row.tx.slice(-6) })));
       }
+    } else {
+      facts.appendChild(fact("Outcome", row.outcome || "--"));
+      facts.appendChild(fact("Shares", shares(kind === "closed" ? row.total_size : row.size)));
+      facts.appendChild(fact("Avg price", cents(row.avg_price)));
+      facts.appendChild(fact(kind === "closed" ? "Final price" : "Current price", cents(row.current_price)));
+      if (kind !== "closed") {
+        facts.appendChild(fact("Cost", usd(row.cost)));
+        facts.appendChild(fact("Value", usd(row.value)));
+      }
+      var pnl = kind === "closed" ? row.realized_pnl : row.total_pnl;
+      var pnlN = el("span", { class: cls(pnl), text: signedUsd(pnl) });
+      facts.appendChild(fact(kind === "closed" ? "Realized P&L" : "Total P&L", "", false, pnlN));
+      if (row.opened) facts.appendChild(fact("Opened", dt(row.opened)));
+      if (row.last_activity) facts.appendChild(fact("Last activity", dt(row.last_activity)));
     }
-    return { known: false };
-  }
+    if (url) facts.appendChild(fact("Polymarket", "", true, el("a", { href: url, target: "_blank", rel: "noopener noreferrer", text: "View market on polymarket.com ↗" })));
 
-  /* ---- Formatting ---- */
-
-  function duration(ms) {
-    var total = Math.max(1, Math.ceil(ms / 60000));
-    var days = Math.floor(total / 1440);
-    var hours = Math.floor((total % 1440) / 60);
-    var mins = total % 60;
-    if (days > 0) return days + "d " + hours + "h";
-    if (hours > 0) return hours + "h " + mins + "m";
-    return mins + "m";
-  }
-
-  var timeOfDay = new Intl.DateTimeFormat("en-US", {
-    timeZone: TZ, hour: "numeric", minute: "2-digit"
-  });
-  var weekdayName = new Intl.DateTimeFormat("en-US", {
-    timeZone: TZ, weekday: "long"
-  });
-  var clockFormat = new Intl.DateTimeFormat("en-US", {
-    timeZone: TZ, hour: "numeric", minute: "2-digit", second: "2-digit",
-    hour12: true, timeZoneName: "short"
-  });
-
-  function whenLabel(targetMs, nowMs) {
-    var t = etParts(targetMs);
-    var n = etParts(nowMs);
-    var diff = Math.round(
-      (Date.UTC(t.y, t.mo - 1, t.d) - Date.UTC(n.y, n.mo - 1, n.d)) / 86400000
-    );
-    var day = diff === 0 ? "today" : diff === 1 ? "tomorrow" : weekdayName.format(new Date(targetMs));
-    return day + " at " + timeOfDay.format(new Date(targetMs)) + " ET";
-  }
-
-  function statusText(state, nowMs) {
-    if (!state.known) return "";
-    if (state.open) {
-      var when = timeOfDay.format(new Date(state.closesAt)) + " ET";
-      var lead = state.early
-        ? "The NYSE is open and closes early today at "
-        : "The NYSE is open. Regular trading ends at ";
-      return lead + when + ", in " + duration(state.closesAt - nowMs) + ".";
+    if (m) fillMarket(m);
+    else if (validSlug(row.slug)) {
+      outsBox.appendChild(el("p", { class: "d-loading", text: "Loading market data…" }));
+      loadMarkets([row.slug]).then(function () {
+        outsBox.textContent = "";
+        if (S.market[row.slug]) fillMarket(S.market[row.slug]);
+        else outsBox.appendChild(el("p", { class: "d-loading", text: "Live market data unavailable right now." }));
+      });
     }
-    return "The NYSE is closed. It opens " + whenLabel(state.opensAt, nowMs) +
-      ", in " + duration(state.opensAt - nowMs) + ".";
+    return wrap;
   }
 
-  /* ---- Page ---- */
+  function toggleRow(row, rowEl, kind) {
+    var next = rowEl.nextElementSibling;
+    if (next && next.classList.contains("detail")) {
+      next.remove();
+      rowEl.setAttribute("aria-expanded", "false");
+      return;
+    }
+    rowEl.parentNode.querySelectorAll(".detail").forEach(function (n) {
+      n.previousElementSibling.setAttribute("aria-expanded", "false");
+      n.remove();
+    });
+    rowEl.setAttribute("aria-expanded", "true");
+    rowEl.parentNode.insertBefore(buildDetail(row, kind), rowEl.nextSibling);
+  }
+
+  function makeRow(row, kind, inner) {
+    var r = el("div", { class: "row", role: "row", tabindex: "0", "aria-expanded": "false" }, inner);
+    function go() { toggleRow(row, r, kind); }
+    r.addEventListener("click", function (e) { if (e.target.closest("a")) return; go(); });
+    r.addEventListener("keydown", function (e) {
+      if (e.key === "Enter" || e.key === " ") { e.preventDefault(); go(); }
+    });
+    return r;
+  }
+
+  /* ---------- lists ---------- */
+
+  function side(outcome) {
+    var o = String(outcome || "").toLowerCase();
+    return o === "no" ? "pill no" : o === "yes" ? "pill" : "pill neutral";
+  }
+
+  function posRow(p, kind) {
+    var mkt = el("div", { class: "mkt" }, [
+      thumb(p),
+      el("div", { class: "mkt-text" }, [
+        el("div", { class: "mkt-title", text: p.title || "Unknown market", title: p.title || "" }),
+        el("div", { class: "sub" }, [
+          el("span", { class: side(p.outcome), text: p.outcome || "--" }),
+          el("span", { text: kind === "closed" ? shares(p.total_size) + " shares" : shares(p.size) + " shares" }),
+          p.status === "REDEEMABLE" ? el("span", { class: "pill neutral", text: "Resolved" }) : null
+        ])
+      ])
+    ]);
+    var avg = el("div", { class: "num r c-avg", text: cents(p.avg_price) });
+    var cur = el("div", { class: "num r c-cur", text: cents(p.current_price) });
+    var val;
+    if (kind === "closed") {
+      val = el("div", { class: "num r " + cls(p.realized_pnl) }, [document.createTextNode(signedUsd(p.realized_pnl))]);
+      val.appendChild(el("small", { class: "muted", text: d(p.last_activity) }));
+    } else {
+      val = el("div", { class: "num r" }, [document.createTextNode(usd(p.value))]);
+      var pc = Number(p.percent_pnl);
+      var tag = signedUsd(p.unrealized_pnl) + (p.percent_pnl != null && isFinite(pc) ? " (" + (pc > 0 ? "+" : "") + pc.toFixed(1) + "%)" : "");
+      val.appendChild(el("small", { class: cls(p.unrealized_pnl), text: tag }));
+    }
+    return makeRow(p, kind, [mkt, avg, cur, val]);
+  }
+
+  function actRow(a) {
+    var type = a.type === "TRADE" ? (a.side || "Trade") : (a.type || "--");
+    type = type.charAt(0).toUpperCase() + type.slice(1).toLowerCase();
+    var tcls = a.side === "BUY" ? "pos" : a.side === "SELL" ? "neg" : "muted";
+    var mkt = el("div", { class: "mkt" }, [
+      thumb(a),
+      el("div", { class: "mkt-text" }, [
+        el("div", { class: "mkt-title", text: a.title || "Unknown market", title: a.title || "" }),
+        el("div", { class: "sub" }, [
+          a.outcome ? el("span", { class: side(a.outcome), text: a.outcome }) : null,
+          a.shares ? el("span", { text: shares(a.shares) + " shares" + (a.price != null && a.price !== "" ? " at " + cents(a.price) : "") }) : null,
+          a.time ? el("span", { class: "t-inline", text: "· " + ago(a.time) }) : null
+        ])
+      ])
+    ]);
+    var amt = el("div", { class: "num r", text: a.usdc ? usd(a.usdc) : "--" });
+    var time = el("div", { class: "num r muted c-time", text: a.time ? ago(a.time) : "--", title: dt(a.time) });
+    return makeRow(a, "activity", [el("div", { class: "num " + tcls, text: type }), mkt, amt, time]);
+  }
+
+  function head(cols, klass) {
+    var h = el("div", { class: "thead " + (klass || ""), role: "row" });
+    cols.forEach(function (c) { h.appendChild(el("div", { class: c[1] || "", text: c[0] })); });
+    return h;
+  }
+
+  function renderList() {
+    if (S.view === "positions") renderPositions(); else renderActivity();
+  }
+
+  function renderPositions() {
+    var t = $("t-positions");
+    t.textContent = "";
+    t.className = "table";
+    var closed = S.status === "closed";
+    var rows = (closed ? S.closed : S.positions).slice();
+    var q = S.q.trim().toLowerCase();
+    if (q) rows = rows.filter(function (r) { return ((r.title || "") + " " + (r.outcome || "")).toLowerCase().indexOf(q) >= 0; });
+
+    var by = SORTS[S.status][S.sort[S.status]] || SORTS[S.status].recent;
+    rows.sort(function (a, b) {
+      var x = by.fn(a), y = by.fn(b);
+      if (typeof x === "string" || typeof y === "string") return String(y).localeCompare(String(x));
+      return (y || 0) - (x || 0);
+    });
+    if ($("sort").value !== S.sort[S.status]) $("sort").value = S.sort[S.status];
+
+    t.appendChild(head(closed
+      ? [["Market"], ["Avg", "r c-avg"], ["Final", "r c-cur"], ["P&L", "r"]]
+      : [["Market"], ["Avg", "r c-avg"], ["Current", "r c-cur"], ["Value", "r"]]));
+
+    if (!rows.length) {
+      t.appendChild(el("p", { class: "empty-msg", text: q ? "No positions match your search." : "No positions found" }));
+      $("pos-more").hidden = true;
+      return;
+    }
+    rows.slice(0, S.shownPos).forEach(function (r) { t.appendChild(posRow(r, closed ? "closed" : "active")); });
+    var more = $("pos-more");
+    more.hidden = rows.length <= S.shownPos;
+    more.textContent = "Show more (" + (rows.length - S.shownPos) + " left)";
+  }
+
+  function renderActivity() {
+    var t = $("t-activity");
+    t.textContent = "";
+    t.className = "table act";
+    t.appendChild(head([["Type"], ["Market"], ["Amount", "r"], ["Time", "r c-time-h"]], "act"));
+    if (!S.activity.length) {
+      t.appendChild(el("p", { class: "empty-msg", text: "No activity yet" }));
+      $("act-more").hidden = true;
+      return;
+    }
+    S.activity.slice(0, S.shownAct).forEach(function (a) { t.appendChild(actRow(a)); });
+    var more = $("act-more");
+    more.hidden = S.activity.length <= S.shownAct;
+    more.textContent = "Show more (" + (S.activity.length - S.shownAct) + " left)";
+  }
+
+  /* ---------- sorting ---------- */
+
+  // Closed positions report a leftover "cost" (not the amount originally put in), so use shares x avg price.
+  function ret(p, pnl, closed) {
+    var c = closed ? (p.total_size || 0) * (p.avg_price || 0) : p.cost;
+    return c > 0 ? pnl / c : 0;
+  }
+
+  var SORTS = {
+    active: {
+      value:  { label: "Value", fn: function (p) { return p.value; } },
+      pnl:    { label: "Profit/Loss", fn: function (p) { return p.total_pnl; } },
+      ret:    { label: "Return", fn: function (p) { return ret(p, p.total_pnl); } },
+      recent: { label: "Latest", fn: function (p) { return p.last_activity || ""; } }
+    },
+    closed: {
+      recent: { label: "Latest", fn: function (p) { return p.last_activity || ""; } },
+      pnl:    { label: "Profit/Loss", fn: function (p) { return p.realized_pnl; } },
+      ret:    { label: "Return", fn: function (p) { return ret(p, p.realized_pnl, true); } },
+      size:   { label: "Amount bought", fn: function (p) { return (p.total_size || 0) * (p.avg_price || 0); } }
+    }
+  };
+
+  function fillSortOptions() {
+    var sel = $("sort"), opts = SORTS[S.status];
+    sel.textContent = "";
+    Object.keys(opts).forEach(function (k) { sel.appendChild(el("option", { value: k, text: opts[k].label })); });
+    sel.value = S.sort[S.status];
+  }
+
+  /* ---------- wiring ---------- */
+
+  function setOn(group, attr, val) {
+    group.querySelectorAll("button").forEach(function (b) {
+      var on = b.getAttribute(attr) === val;
+      b.classList.toggle("on", on);
+      b.setAttribute("aria-selected", on ? "true" : "false");
+    });
+  }
+
+  function wire() {
+    document.querySelector(".ranges").addEventListener("click", function (e) {
+      var b = e.target.closest("button"); if (!b) return;
+      S.range = b.getAttribute("data-r");
+      setOn(this, "data-r", S.range);
+      renderPnl();
+    });
+    document.querySelector(".subtabs").addEventListener("click", function (e) {
+      var b = e.target.closest("button"); if (!b) return;
+      S.view = b.getAttribute("data-v");
+      setOn(this, "data-v", S.view);
+      $("v-positions").hidden = S.view !== "positions";
+      $("v-activity").hidden = S.view !== "activity";
+      renderList();
+    });
+    document.querySelector(".seg").addEventListener("click", function (e) {
+      var b = e.target.closest("button"); if (!b) return;
+      S.status = b.getAttribute("data-s");
+      S.shownPos = PAGE;
+      setOn(this, "data-s", S.status);
+      fillSortOptions();
+      renderPositions();
+    });
+    $("q").addEventListener("input", function () { S.q = this.value; S.shownPos = PAGE; renderPositions(); });
+    $("sort").addEventListener("change", function () { S.sort[S.status] = this.value; S.shownPos = PAGE; renderPositions(); });
+    $("pos-more").addEventListener("click", function () { S.shownPos += PAGE; renderPositions(); });
+    $("act-more").addEventListener("click", function () { S.shownAct += PAGE; renderActivity(); });
+
+    $("copy-addr").addEventListener("click", function () {
+      var a = S.summary && S.summary.wallet;
+      if (!a || !navigator.clipboard) return;
+      var b = this;
+      navigator.clipboard.writeText(a).then(function () { b.title = "Copied!"; setTimeout(function () { b.title = "Copy wallet address"; }, 1500); }).catch(function () {});
+    });
+    $("share").addEventListener("click", function () {
+      var url = location.href;
+      if (navigator.share) navigator.share({ title: "kb-capital", url: url }).catch(function () {});
+      else if (navigator.clipboard) navigator.clipboard.writeText(url).catch(function () {});
+    });
+
+    // Redraw the chart whenever its box changes size (rotate, resize, zoom, TV, split view).
+    var lastW = 0, lastH = 0, timer;
+    function redraw() {
+      var b = $("pl-chart"), w = b.clientWidth, h = b.clientHeight;
+      if (Math.abs(w - lastW) > 4 || Math.abs(h - lastH) > 4) { lastW = w; lastH = h; renderPnl(); }
+    }
+    if (window.ResizeObserver) new ResizeObserver(function () { clearTimeout(timer); timer = setTimeout(redraw, 80); }).observe($("pl-chart"));
+    else window.addEventListener("resize", function () { clearTimeout(timer); timer = setTimeout(redraw, 120); });
+  }
 
   function start() {
-    var timeEl = document.getElementById("time");
-    var statusEl = document.getElementById("status");
-    var statusTextEl = document.getElementById("status-text");
-    var sessionEl = document.getElementById("session");
-    var nowEl = document.getElementById("now");
-    var placeEl = document.getElementById("place");
-    var stripEl = document.getElementById("strip");
-    var yearEl = document.getElementById("year");
-    var contactEl = document.getElementById("contact");
-    var contactLink = document.getElementById("contact-link");
+    $("year").textContent = String(new Date().getFullYear());
+    wire();
+    fillSortOptions();
+    renderPnl();
+    renderList();
 
-    if (CONTACT_EMAIL) {
-      contactLink.href = "mailto:" + CONTACT_EMAIL;
-      contactLink.textContent = CONTACT_EMAIL;
-      contactEl.hidden = false;
-    }
-
-    function tick() {
-      var now = Date.now();
-      var p = etParts(now);
-
-      // Clock: "10:55:12" plus a small "PM".
-      var pieces = clockFormat.formatToParts(new Date(now));
-      var hms = [];
-      var ampm = "";
-      var zone = "";
-      pieces.forEach(function (x) {
-        if (x.type === "hour" || x.type === "minute" || x.type === "second") hms.push(x.value);
-        if (x.type === "dayPeriod") ampm = x.value;
-        if (x.type === "timeZoneName") zone = x.value;
-      });
-      timeEl.firstChild.nodeValue = hms[0] + ":" + hms[1] + ":" + hms[2];
-      timeEl.querySelector(".ampm").textContent = ampm;
-      placeEl.textContent = "New York (" + zone + ")";
-
-      // Status sentence.
-      var state = marketState(now);
-      if (state.known) {
-        statusEl.setAttribute("data-state", state.open ? "open" : "closed");
-        statusTextEl.textContent = statusText(state, now);
-      } else {
-        statusEl.removeAttribute("data-state");
-        statusTextEl.textContent = "Market hours are not available for this date.";
-      }
-
-      // 24-hour strip: shaded session and the marker for now.
-      var secs = p.h * 3600 + p.mi * 60 + p.s;
-      nowEl.style.left = (secs / 86400) * 100 + "%";
-
-      var s = state.known ? sessionFor(p.y, p.mo, p.d) : null;
-      if (s) {
-        var o = etParts(s.open);
-        var c = etParts(s.close);
-        var startPct = ((o.h * 3600 + o.mi * 60) / 86400) * 100;
-        var endPct = ((c.h * 3600 + c.mi * 60) / 86400) * 100;
-        sessionEl.style.left = startPct + "%";
-        sessionEl.style.width = endPct - startPct + "%";
-        sessionEl.classList.remove("is-off");
-        stripEl.setAttribute(
-          "aria-label",
-          "A 24-hour day in New York. The NYSE session runs from " +
-            timeOfDay.format(new Date(s.open)) + " to " + timeOfDay.format(new Date(s.close)) +
-            ". The current time is marked."
-        );
-      } else {
-        sessionEl.classList.add("is-off");
-        stripEl.setAttribute(
-          "aria-label",
-          "A 24-hour day in New York with the current time marked. The NYSE is not trading today."
-        );
-      }
-
-      yearEl.textContent = String(p.y);
-
-      // Run again just after the next whole second.
-      setTimeout(tick, 1000 - (Date.now() % 1000) + 5);
-    }
-
-    tick();
+    get("data/summary.json").then(function (s) { renderSummary(s); renderPnl(); }).catch(function () {
+      $("updated").textContent = "Data not available yet. The first update runs shortly after setup.";
+    });
+    var done = 0;
+    function after() { if (++done === 4) refreshThumbs(); }
+    get("data/positions.json").then(function (r) { S.positions = r; }).catch(function () {}).then(function () { renderList(); after(); });
+    get("data/closed.json").then(function (r) { S.closed = r; }).catch(function () {}).then(function () { renderList(); after(); });
+    get("data/activity.json").then(function (r) { S.activity = r; }).catch(function () {}).then(function () { renderList(); after(); });
+    get("data/pnl.json").then(function (r) { S.pnl = r; renderTotalPnl(); renderPnl(); }).catch(function () {}).then(after);
   }
 
-  if (typeof document !== "undefined") {
-    if (document.readyState === "loading") {
-      document.addEventListener("DOMContentLoaded", start);
-    } else {
-      start();
-    }
-  }
-
-  // Lets the market logic be tested outside a browser.
-  if (typeof module !== "undefined" && module.exports) {
-    module.exports = { marketState: marketState, statusText: statusText, sessionFor: sessionFor };
-  }
+  if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", start);
+  else start();
 })();

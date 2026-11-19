@@ -1,0 +1,44 @@
+name: Update portfolio data
+
+on:
+  schedule:
+    - cron: "7,37 * * * *"   # every 30 minutes
+  workflow_dispatch: {}       # lets you run it by hand from the Actions tab
+
+permissions:
+  contents: write
+
+concurrency:
+  group: update-data
+  cancel-in-progress: false
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Pull Polymarket data
+        env:
+          # Public wallet address. Set under Settings > Secrets and variables > Actions > Variables.
+          WALLET_ADDRESS: ${{ vars.WALLET_ADDRESS }}
+          # Optional: hide the newest trades from the public feed (hours). Default 0.
+          TRADE_DELAY_HOURS: ${{ vars.TRADE_DELAY_HOURS }}
+        run: python scripts/update.py
+
+      - name: Commit changes
+        run: |
+          git config user.name  "kbcap-bot"
+          git config user.email "kbcap-bot@users.noreply.github.com"
+          git add data
+          if git diff --cached --quiet; then
+            echo "No changes."
+          else
+            git commit -m "data: update $(date -u +%Y-%m-%dT%H:%MZ)"
+            git pull --rebase origin "${GITHUB_REF_NAME}"
+            git push
+          fi

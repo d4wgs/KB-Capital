@@ -2,57 +2,118 @@
 <html lang="en">
 <head>
   <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>KB Capital</title>
-  <meta name="description" content="KB Capital is a private investment partnership.">
-  <meta name="color-scheme" content="light dark">
-  <meta property="og:title" content="KB Capital">
-  <meta property="og:description" content="A private investment partnership.">
-  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='6' fill='%23101A24'/%3E%3Ctext x='16' y='22' font-size='15' font-family='sans-serif' font-weight='700' text-anchor='middle' fill='%23E8ECEE'%3EKB%3C/text%3E%3C/svg%3E">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>kb-capital | Portfolio</title>
+  <meta name="description" content="Live view of KB Capital's Polymarket portfolio: positions, activity and profit/loss.">
+  <meta name="color-scheme" content="dark">
+  <meta name="theme-color" content="#1d2b39">
+  <meta property="og:title" content="kb-capital | Portfolio">
+  <meta property="og:description" content="Live view of KB Capital's Polymarket portfolio.">
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='16' fill='%23FDF3EC'/%3E%3Ctext x='16' y='21' font-size='12' font-family='sans-serif' font-weight='700' text-anchor='middle' fill='%231D2B3A'%3EK%26B%3C/text%3E%3C/svg%3E">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Schibsted+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="style.css">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css?v=5">
 </head>
 <body>
-  <header class="top">
-    <a class="mark" href="/">KB Capital</a>
-  </header>
+  <main class="wrap">
+    <nav class="tabs" aria-label="Portfolio sections">
+      <button class="tab on" type="button">Predictions</button>
+    </nav>
 
-  <main>
-    <section class="clock" aria-labelledby="place">
-      <p class="place" id="place">New York</p>
-      <p class="time" id="time">--:--:--<span class="ampm"></span></p>
-      <p class="status" id="status"><span class="dot" id="dot"></span><span id="status-text">Checking market hours…</span></p>
-
-      <div class="strip" id="strip" role="img" aria-label="A 24-hour day in New York with the NYSE trading session shaded and the current time marked">
-        <div class="session" id="session"></div>
-        <div class="now" id="now"></div>
+    <section class="top-grid">
+      <!-- Profile card -->
+      <div class="panel profile">
+        <div class="who">
+          <div class="avatar" aria-hidden="true"><span>K&amp;B</span><span>Capital</span></div>
+          <div class="who-text">
+            <h1>kb-capital</h1>
+            <p class="meta" id="meta">Joined Nov 2026</p>
+          </div>
+          <div class="icons">
+            <button class="icon-btn" id="copy-addr" type="button" title="Copy wallet address" aria-label="Copy wallet address">
+              <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="11" height="11" rx="2"/><path d="M5 15V6a2 2 0 0 1 2-2h9"/></svg>
+            </button>
+            <button class="icon-btn" id="share" type="button" title="Share" aria-label="Share this page">
+              <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 15V3"/><path d="m7 8 5-5 5 5"/><path d="M5 12v7a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-7"/></svg>
+            </button>
+          </div>
+        </div>
+        <div class="stats3">
+          <div><p class="big" id="s-positions">--</p><p class="cap">Positions Value</p></div>
+          <div><p class="big" id="s-best">--</p><p class="cap">Biggest Win</p></div>
+          <div><p class="big" id="s-markets">--</p><p class="cap">Markets Traded</p></div>
+        </div>
+        <dl class="kv">
+          <div><dt>Total PnL</dt><dd id="s-pnl">--</dd></div>
+          <div><dt>Total Volume</dt><dd id="s-volume">--</dd></div>
+          <div><dt>Cash</dt><dd id="s-cash">--</dd></div>
+        </dl>
       </div>
-      <ol class="ticks" aria-hidden="true">
-        <li>12 AM</li>
-        <li>6 AM</li>
-        <li>12 PM</li>
-        <li>6 PM</li>
-        <li>12 AM</li>
-      </ol>
+
+      <!-- P&L card -->
+      <div class="panel pnl">
+        <div class="pnl-head">
+          <div>
+            <p class="pl-label"><span class="arrow" id="pl-arrow">▲</span> Profit/Loss</p>
+            <p class="pl-value" id="pl-value">--</p>
+          </div>
+          <div class="ranges" role="tablist" aria-label="Profit/Loss range">
+            <button type="button" role="tab" data-r="1h" aria-selected="false">1H</button>
+            <button type="button" role="tab" data-r="12h" aria-selected="false">12H</button>
+            <button type="button" role="tab" data-r="1d" class="on" aria-selected="true">1D</button>
+            <button type="button" role="tab" data-r="1w" aria-selected="false">1W</button>
+            <button type="button" role="tab" data-r="1m" aria-selected="false">1M</button>
+            <button type="button" role="tab" data-r="all" aria-selected="false">ALL</button>
+          </div>
+        </div>
+        <div class="pl-chart" id="pl-chart" role="img" aria-label="Profit and loss chart"></div>
+        <p class="pl-foot" id="pl-foot"></p>
+      </div>
     </section>
 
-    <section class="block about">
-      <h2>About</h2>
-      <p>KB Capital is a private investment partnership.</p>
-    </section>
+    <!-- Positions / Activity -->
+    <section class="lists">
+      <div class="subtabs" role="tablist">
+        <button type="button" role="tab" class="on" data-v="positions" aria-selected="true">Positions</button>
+        <button type="button" role="tab" data-v="activity" aria-selected="false">Activity</button>
+      </div>
 
-    <section class="block contact" id="contact" hidden>
-      <h2>Contact</h2>
-      <p><a id="contact-link" href="#"></a></p>
+      <div id="v-positions">
+        <div class="toolbar">
+          <div class="seg" role="tablist" aria-label="Position status">
+            <button type="button" role="tab" class="on" data-s="active" aria-selected="true">Active</button>
+            <button type="button" role="tab" data-s="closed" aria-selected="false">Closed</button>
+          </div>
+          <label class="search">
+            <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+            <input id="q" type="search" placeholder="Search positions" autocomplete="off">
+          </label>
+          <label class="sort">
+            <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 6h16M7 12h10M10 18h4"/></svg>
+            <select id="sort" aria-label="Sort positions">
+              <option value="value">Value</option>
+              <option value="pnl">Profit/Loss</option>
+              <option value="recent">Latest</option>
+            </select>
+          </label>
+        </div>
+        <div class="table" id="t-positions" role="table"></div>
+        <button class="more" id="pos-more" type="button" hidden>Show more</button>
+      </div>
+
+      <div id="v-activity" hidden>
+        <div class="table" id="t-activity" role="table"></div>
+        <button class="more" id="act-more" type="button" hidden>Show more</button>
+      </div>
     </section>
   </main>
 
   <footer class="foot">
-    <p>&copy; <span id="year">2026</span> KB Capital. This site is for general information only. It is not an offer to sell, or a solicitation of an offer to buy, any security or interest in any fund.</p>
+    <p id="updated">Loading…</p>
+    <p>&copy; <span id="year">2026</span> KB Capital. A private portfolio of personal funds. Not accepting outside capital. Data comes from Polymarket's public APIs and refreshes about every 30 minutes. Figures are marked values, not guaranteed. Past results do not predict future results. Nothing here is investment advice, an offer to sell, or a solicitation of an offer to buy any security or interest in any fund. Not affiliated with Polymarket.</p>
   </footer>
 
-  <script src="script.js" defer></script>
+  <script src="script.js?v=5" defer></script>
 </body>
 </html>
