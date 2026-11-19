@@ -857,8 +857,19 @@
     else window.addEventListener("resize", function () { clearTimeout(timer); timer = setTimeout(redraw, 120); });
   }
 
+  // Swap the tab title while the page isn't being looked at (tab hidden, or its window not focused).
+  var TITLE_ACTIVE = document.title;
+  var TITLE_AWAY = "Your $ is better in our hands";
+  function syncTitle() {
+    document.title = document.hidden || !document.hasFocus() ? TITLE_AWAY : TITLE_ACTIVE;
+  }
+  document.addEventListener("visibilitychange", syncTitle);
+  window.addEventListener("blur", syncTitle);
+  window.addEventListener("focus", syncTitle);
+
   function start() {
     $("year").textContent = String(new Date().getFullYear());
+    syncTitle();
     wire();
     fillSortOptions();
     renderPnl();
