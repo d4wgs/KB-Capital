@@ -490,6 +490,9 @@
 
   function renderList() {
     if (S.view === "positions") renderPositions(); else renderActivity();
+    // With nothing to list, fit the whole page to the window so it doesn't scroll.
+    var t = $(S.view === "positions" ? "t-positions" : "t-activity");
+    document.body.classList.toggle("fit", !t.querySelector(".row"));
   }
 
   function renderPositions() {

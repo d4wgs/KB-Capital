@@ -270,3 +270,52 @@ h1 { font-size: 1.5rem; font-weight: 600; letter-spacing: -.01em; overflow: hidd
 }
 
 @media (prefers-reduced-motion: reduce) { * { scroll-behavior: auto !important; transition: none !important; } }
+
+/* Fit-to-screen mode: the page fills the window (no scrolling) when there is little to show.
+   Used by the Calendar tab, and by Predictions while there are no positions. Falls back to normal
+   scrolling if the window is too short for the content. Sizes are rem, so large monitors scale up. */
+body.fit { min-height: 100vh; min-height: 100dvh; display: flex; flex-direction: column; }
+body.fit .wrap { flex: 1 1 auto; width: 100%; display: flex; flex-direction: column; min-height: 0; padding-bottom: .5rem; }
+body.fit .tabs { flex: none; }
+body.fit .foot { flex: none; width: 100%; padding-bottom: max(.75rem, env(safe-area-inset-bottom)); font-size: .68rem; line-height: 1.35; }
+body.fit .foot p + p { margin-top: .25rem; }
+/* Predictions: cards stretch to share the height; the chart takes the spare room */
+body.fit .top-grid { flex: 1 1 auto; min-height: 0; }
+body.fit .pnl { min-height: 0; }
+body.fit .pl-chart { flex: 1 1 auto; height: auto; min-height: 8rem; }
+body.fit .lists { flex: none; margin-top: 1rem; }
+body.fit .empty-msg { padding: 1.5rem 0 1rem; }
+body.fit .thead { padding-top: .5rem; }
+@media (max-width: 760px) { body.fit .foot { font-size: .6rem; } body.fit .top-grid { flex: none; } body.fit .pl-chart { flex: none; height: 9rem; } }
+/* phones: squeeze the Predictions cards so the empty state fits one screen */
+@media (max-width: 760px) {
+  body.fit .who { padding: .6rem .875rem; gap: .625rem; }
+  body.fit .avatar { width: 2.75rem; height: 2.75rem; }
+  body.fit .avatar span:first-child { font-size: .8rem; }
+  body.fit .avatar span:last-child { font-size: .45rem; }
+  body.fit h1 { font-size: 1.1rem; }
+  body.fit .icon-btn { width: 2rem; height: 2rem; }
+  body.fit .stats3 { padding: .6rem .5rem .5rem; }
+  body.fit .big { font-size: .95rem; }
+  body.fit .cap { font-size: .68rem; }
+  body.fit .kv { grid-template-columns: repeat(3, minmax(0, 1fr)); margin: 0 .875rem .6rem; padding-top: .5rem; gap: .5rem; }
+  body.fit .kv div { flex-direction: column; gap: 0; font-size: .72rem; text-align: center; }
+  body.fit .pnl { padding: .6rem .875rem .5rem; }
+  body.fit .pl-value { font-size: 1.5rem; }
+  body.fit .ranges button { padding: .25rem .5rem; min-width: 2.2rem; font-size: .75rem; }
+  body.fit .pl-chart { height: 5.5rem; margin-top: .4rem; }
+  body.fit .pl-foot { margin-top: .25rem; font-size: .68rem; min-height: 0; }
+  body.fit .top-grid { gap: .625rem; }
+  body.fit .lists { margin-top: .625rem; }
+  body.fit .subtabs { margin-bottom: .4rem; }
+  body.fit .subtabs button { font-size: 1rem; padding: .1rem 0; }
+  body.fit .toolbar { padding: .35rem; }
+  body.fit .empty-msg { padding: 1rem 0 .75rem; }
+  body.fit .toolbar { flex-wrap: nowrap; gap: .4rem; }
+  body.fit .toolbar .sort { display: none; }
+  body.fit .search { height: 2.1rem; }
+  body.fit .seg button { padding: .3rem .7rem; }
+  body.fit .meta { font-size: .72rem; }
+  body.fit .pl-chart { height: 4.5rem; }
+  body.fit .stats3 { padding-top: .45rem; }
+}

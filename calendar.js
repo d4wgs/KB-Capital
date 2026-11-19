@@ -51,6 +51,12 @@
     series.forEach(function (p) { eod[dayNum(p.t)] = p.pnl; });
 
     var m = (summary && summary.metrics) || {};
+
+    // The hourly P&L series lags (and marks open positions at the last hourly price). If the summary is newer
+    // than the series, end the last day on the summary's total P&L (realized + unrealized) so the closing
+    // profit of a trade made after the last hourly reading is not missed.
+    var upd = summary && summary.updated ? new Date(summary.updated).getTime() / 1000 : 0;
+    if (isNum(m.total_pnl) && upd > (series.length ? series[series.length - 1].t : 0)) eod[dayNum(upd)] = m.total_pnl;
     var deposits = isNum(m.net_deposits) ? m.net_deposits
       : (summary && isNum(summary.total_value) && series.length ? summary.total_value - series[series.length - 1].pnl : null);
 
@@ -91,6 +97,7 @@
 
     var lead = new Date(Date.UTC(view.y, view.m, 1)).getUTCDay();
     var count = new Date(Date.UTC(view.y, view.m + 1, 0)).getUTCDate();
+    grid.style.setProperty("--weeks", String(Math.ceil((lead + count) / 7)));  // rows share the screen height
     var i;
     for (i = 0; i < lead; i++) grid.appendChild(el("div", { class: "day blank", "aria-hidden": "true" }));
 
