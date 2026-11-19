@@ -107,13 +107,14 @@
     $("s-cash").textContent = usd(s.cash);
     renderTotalPnl();
     if (s.wallet) $("meta").textContent = "Joined Nov 2026 · " + s.wallet.slice(0, 6) + "…" + s.wallet.slice(-4);
-    $("updated").textContent = s.updated ? "Data updated " + ago(s.updated) + " (" + dt(s.updated) + ")." : "";
+    $("updated").textContent = s.updated ? (s.live ? "Live data, updated " : "Saved data, updated ") + ago(s.updated) + " (" + dt(s.updated) + ")." : "";
   }
 
   function renderTotalPnl() {
     var n = $("s-pnl");
     var v = null;
-    if (S.pnl && S.pnl.all && S.pnl.all.length) v = S.pnl.all[S.pnl.all.length - 1].pnl;
+    if (S.livePnl != null) v = S.livePnl;
+    else if (S.pnl && S.pnl.all && S.pnl.all.length) v = S.pnl.all[S.pnl.all.length - 1].pnl;
     else if (S.summary && S.summary.metrics) v = S.summary.metrics.total_pnl;
     n.textContent = signedUsd(v);
     n.className = cls(v);
@@ -139,8 +140,11 @@
       .filter(function (p) { return isNum(p.t) && isNum(p.pnl); })
       .map(function (p) { return { t: p.t * 1000, v: p.pnl }; })
       .sort(function (a, b) { return a.t - b.t; });
-    // Carry the latest value forward to the moment the data was refreshed, so the line isn't cut short.
-    if (pts.length && end > pts[pts.length - 1].t) pts.push({ t: end, v: pts[pts.length - 1].v });
+    // Extend the line to "now": with the live P&L figure when we have it (not for the rebuilt 1H view,
+    // which is on a different basis), otherwise by carrying the last value forward.
+    if (pts.length && end > pts[pts.length - 1].t) {
+      pts.push({ t: end, v: range !== "1h" && S.livePnl != null ? S.livePnl : pts[pts.length - 1].v });
+    }
     if (range === "all") {
       // All-time P&L starts at zero when the account does.
       if (pts.length && pts[0].v !== 0) pts.unshift({ t: pts[0].t - 36e5, v: 0 });
@@ -403,6 +407,7 @@
     if (next && next.classList.contains("detail")) {
       next.remove();
       rowEl.setAttribute("aria-expanded", "false");
+      if (S.dirty) { S.dirty = false; renderList(); } // apply live changes that arrived while this row was open
       return;
     }
     rowEl.parentNode.querySelectorAll(".detail").forEach(function (n) {
@@ -565,6 +570,233 @@
     sel.value = S.sort[S.status];
   }
 
+  /* ---------- live updates ----------
+     The saved JSON (refreshed by GitHub every 15 min) paints the page instantly. Then, every 30 s while the
+     tab is visible, the page asks Polymarket's public read-only API for fresh numbers. It pauses when the tab
+     is hidden or offline, and slows down automatically if Polymarket rate-limits or errors. */
+
+  var DATA_API = "https://data-api.polymarket.com/v2";
+  var RPCS = ["https://polygon.drpc.org", "https://1rpc.io/matic", "https://polygon-bor-rpc.publicnode.com"];
+  var PUSD = "0xC011a7E12a19f7B1f670d46F03B03f3342E82DFB";
+  var LIVE_MS = 30000, LIVE_MAX_MS = 300000;
+  var L = { timer: null, delay: LIVE_MS, fails: 0, busy: false, last: 0, started: false, closedAt: 0, statsAt: 0 };
+
+  function toNum(x, dflt) { var n = Number(x); return x !== null && x !== "" && x !== undefined && isFinite(n) ? n : (dflt === undefined ? 0 : dflt); }
+  function isoOf(ts) {
+    var n = toNum(ts, 0);
+    if (n <= 0) return null;
+    if (n > 1e12) n /= 1000;
+    return new Date(n * 1000).toISOString().replace(/\.\d+Z$/, "Z");
+  }
+
+  function pollApi(path, params) {
+    var qs = Object.keys(params).map(function (k) { return k + "=" + encodeURIComponent(params[k]); }).join("&");
+    return fetch(DATA_API + path + "?" + qs, { credentials: "omit", referrerPolicy: "no-referrer", cache: "no-store" })
+      .then(function (r) {
+        if (!r.ok) {
+          var e = new Error("HTTP " + r.status);
+          e.status = r.status;
+          e.retryAfter = toNum(r.headers.get("Retry-After"), 0);
+          throw e;
+        }
+        return r.json();
+      });
+  }
+
+  function cashOnChain(wallet) {
+    var body = JSON.stringify({ jsonrpc: "2.0", id: 1, method: "eth_call",
+      params: [{ to: PUSD, data: "0x70a08231" + wallet.slice(2).padStart(64, "0") }, "latest"] });
+    function tryRpc(i) {
+      if (i >= RPCS.length) return Promise.resolve(null);
+      return fetch(RPCS[i], { method: "POST", headers: { "Content-Type": "application/json" }, body: body, credentials: "omit", referrerPolicy: "no-referrer" })
+        .then(function (r) { if (!r.ok) throw new Error(r.status); return r.json(); })
+        .then(function (j) {
+          if (!j || typeof j.result !== "string" || !/^0x[0-9a-fA-F]+$/.test(j.result)) throw new Error("bad result");
+          return Number(BigInt(j.result)) / 1e6;
+        })
+        .catch(function () { return tryRpc(i + 1); });
+    }
+    return tryRpc(0);
+  }
+
+  function slimPos(p) {
+    return {
+      title: p.title, slug: p.slug, event_slug: p.event_slug, outcome: p.outcome, status: p.status,
+      size: toNum(p.current_size), total_size: toNum(p.total_size), avg_price: toNum(p.avg_price),
+      current_price: p.current_price, cost: toNum(p.entry_cost_usdc), value: toNum(p.current_value),
+      realized_pnl: toNum(p.realized_pnl), unrealized_pnl: toNum(p.unrealized_pnl), total_pnl: toNum(p.total_pnl),
+      percent_pnl: p.percent_pnl, end_date: p.end_date, opened: isoOf(p.first_entry_at), last_activity: isoOf(p.last_event_at),
+      condition_id: p.condition_id, token_id: p.token_id
+    };
+  }
+  function slimAct(a) {
+    return {
+      time: isoOf(a.timestamp), type: a.type, side: a.side, title: a.title, slug: a.slug, event_slug: a.event_slug,
+      outcome: a.outcome, shares: toNum(a.size), usdc: toNum(a.usdc_size), price: a.price, tx: a.transaction_hash
+    };
+  }
+
+  // Live rows replace the saved rows they cover; older saved rows (beyond the live page) are kept.
+  function mergeRows(live, saved, timeKey) {
+    if (!live.length) return saved;
+    var oldest = live.reduce(function (m, r) { return r[timeKey] && r[timeKey] < m ? r[timeKey] : m; }, "9999");
+    return live.concat(saved.filter(function (r) { return r[timeKey] && r[timeKey] < oldest; }));
+  }
+
+  function setLiveBadge(state) {
+    var b = $("live");
+    if (!b) return;
+    b.className = "live " + state;
+    var text = { live: "Live", paused: "Paused", retry: "Reconnecting", saved: "Saved data" }[state] || "";
+    b.querySelector("b").textContent = text;
+    b.title = state === "live" ? "Updating every 30 seconds from Polymarket"
+      : state === "paused" ? "Paused while this tab is hidden"
+      : state === "retry" ? "Polymarket didn't respond; trying again shortly"
+      : "Showing the last saved snapshot";
+  }
+
+  function pageDirty(changed) {
+    if (!changed) return;
+    if (document.querySelector(".detail")) { S.dirty = true; return; } // don't collapse a row someone is reading
+    renderList();
+  }
+
+  function applyLive(r) {
+    var s = S.summary;
+    if (!s) return;
+    var m = s.metrics || (s.metrics = {});
+
+    // positions
+    var changed = false;
+    var open = r.open.data.concat(r.redeem.data), more = (r.open.pagination || {}).next_cursor || (r.redeem.pagination || {}).next_cursor;
+    if (!more) {
+      var seen = {}, pos = [];
+      open.forEach(function (p) { var k = p.token_id; if (k && !seen[k]) { seen[k] = 1; pos.push(slimPos(p)); } });
+      pos.sort(function (a, b) { return b.value - a.value; });
+      if (JSON.stringify(pos) !== JSON.stringify(S.positions)) { S.positions = pos; changed = true; }
+      var pv = isNum(r.value) ? r.value : pos.reduce(function (t, p) { return t + p.value; }, 0);
+      s.positions_value = pv;
+      m.open_count = pos.length;
+      m.open_cost = pos.reduce(function (t, p) { return t + p.cost; }, 0);
+      m.unrealized_pnl = pos.reduce(function (t, p) { return t + p.unrealized_pnl; }, 0);
+      m.total_pnl = (m.realized_pnl || 0) + m.unrealized_pnl;
+      m.largest_position_pct = pv > 0 ? Math.max.apply(null, pos.map(function (p) { return p.value; }).concat(0)) / pv : null;
+    }
+    if (isNum(r.cash)) s.cash = r.cash;
+    if (isNum(s.cash) && isNum(s.positions_value)) {
+      s.total_value = s.positions_value + s.cash;
+      if (isNum(m.net_deposits)) m.pnl_vs_deposits = s.total_value - m.net_deposits;
+    }
+
+    // activity (trades etc.)
+    var act = r.activity.data
+      .filter(function (a) { return a.type !== "DEPOSIT" && a.type !== "WITHDRAWAL"; }).map(slimAct);
+    if (act.length) {
+      var merged = mergeRows(act, S.activity, "time").slice(0, 500);
+      if (JSON.stringify(merged) !== JSON.stringify(S.activity)) { S.activity = merged; changed = true; }
+    }
+
+    // closed positions + volume: slower cadence, or right away if something just changed
+    if (r.closed) {
+      var cl = mergeRows(r.closed.data.map(slimPos), S.closed, "last_activity");
+      if (JSON.stringify(cl) !== JSON.stringify(S.closed)) { S.closed = cl; changed = true; }
+      var wins = cl.filter(function (c) { return c.realized_pnl > 0; }), losses = cl.filter(function (c) { return c.realized_pnl < 0; });
+      var realized = cl.reduce(function (t, c) { return t + c.realized_pnl; }, 0);
+      m.closed_count = cl.length; m.wins = wins.length; m.losses = losses.length;
+      m.realized_pnl = realized; m.total_pnl = realized + (m.unrealized_pnl || 0);
+      var best = cl.reduce(function (b, c) { return !b || c.realized_pnl > b.realized_pnl ? c : b; }, null);
+      if (best) { m.best = best.realized_pnl; m.best_title = best.title; }
+    }
+    if (r.volume && r.volume.data && isNum(Number(r.volume.data.volume_usdc))) m.volume_usdc = Number(r.volume.data.volume_usdc);
+    if (r.stats && r.stats.data && isNum(Number(r.stats.data.trades))) m.markets_traded = Number(r.stats.data.trades);
+
+    // All-time P&L as of right now (the hourly series can lag by up to an hour)
+    var ap = r.stats && r.stats.data && r.stats.data.all_time_pnl;
+    if (ap && isNum(Number(ap.economic_pnl))) S.livePnl = Number(ap.economic_pnl);
+
+    s.updated = new Date().toISOString().replace(/\.\d+Z$/, "Z");
+    s.live = true;
+    renderSummary(s);
+    renderPnl();
+    pageDirty(changed);
+    refreshThumbsSoon();
+  }
+
+  var thumbTimer;
+  function refreshThumbsSoon() {
+    clearTimeout(thumbTimer);
+    thumbTimer = setTimeout(function () {
+      var hold = [];
+      [S.positions, S.closed, S.activity].forEach(function (l) { l.forEach(function (x) { hold.push(x.slug); }); });
+      loadMarkets(hold).then(function () { pageDirty(true); });
+    }, 300);
+  }
+
+  function liveOnce() {
+    var w = S.summary && S.summary.wallet;
+    if (!/^0x[0-9a-f]{40}$/.test(w || "")) return Promise.reject(new Error("no wallet"));
+    var now = Date.now();
+    var slow = now - L.closedAt > 300000; // closed positions & volume every 5 min
+    function p(path, extra) { return pollApi(path, Object.assign({ user: w }, extra || {})); }
+    var jobs = {
+      value: p("/value").then(function (j) { return j && j.data ? toNum(j.data.value, null) : null; }),
+      open: p("/positions", { status: "OPEN", limit: 100 }),
+      redeem: p("/positions", { status: "REDEEMABLE", limit: 100 }),
+      activity: p("/activity", { limit: 100, exclude_deposits_withdrawals: "false" }),
+      stats: p("/user-stats").catch(function () { return null; }), // includes the up-to-the-minute all-time P&L
+      cash: cashOnChain(w)
+    };
+    if (slow) {
+      jobs.closed = p("/positions", { status: "CLOSED", sort_by: "TIMESTAMP", sort_direction: "DESC", limit: 100 });
+      jobs.volume = p("/user-volume").catch(function () { return null; });
+    }
+    var keys = Object.keys(jobs);
+    return Promise.all(keys.map(function (k) { return jobs[k]; })).then(function (vals) {
+      var r = {};
+      keys.forEach(function (k, i) { r[k] = vals[i]; });
+      r.open = { data: (r.open && r.open.data) || [], pagination: r.open && r.open.pagination };
+      r.redeem = { data: (r.redeem && r.redeem.data) || [], pagination: r.redeem && r.redeem.pagination };
+      r.activity = { data: (r.activity && r.activity.data) || [] };
+      if (r.closed) r.closed = { data: r.closed.data || [] };
+      if (slow) L.closedAt = now;
+      applyLive(r);
+    });
+  }
+
+  function liveTick() {
+    clearTimeout(L.timer);
+    if (document.hidden || navigator.onLine === false) { setLiveBadge("paused"); return; }
+    if (L.busy) return;
+    L.busy = true;
+    liveOnce().then(function () {
+      L.fails = 0; L.delay = LIVE_MS; L.last = Date.now();
+      setLiveBadge("live");
+    }).catch(function (e) {
+      L.fails++;
+      // Back off: 30s, 60s, 2m, 4m, then 5m. Obey Retry-After if Polymarket sends one.
+      L.delay = Math.min(LIVE_MAX_MS, Math.max((e && e.retryAfter ? e.retryAfter * 1000 : 0), LIVE_MS * Math.pow(2, L.fails - 1)));
+      setLiveBadge(L.last ? "retry" : "saved");
+    }).then(function () {
+      L.busy = false;
+      if (!document.hidden) L.timer = setTimeout(liveTick, L.delay + Math.random() * 5000); // jitter spreads visitors out
+    });
+  }
+
+  function startLive() {
+    if (L.started) return;
+    L.started = true;
+    setLiveBadge("saved");
+    document.addEventListener("visibilitychange", function () {
+      if (document.hidden) { clearTimeout(L.timer); setLiveBadge("paused"); }
+      else liveTick(); // refresh right away when the tab comes back
+    });
+    window.addEventListener("online", liveTick);
+    window.addEventListener("offline", function () { clearTimeout(L.timer); setLiveBadge("paused"); });
+    // keep the "updated Xs ago" text honest between polls
+    setInterval(function () { if (!document.hidden && S.summary && S.summary.updated) $("updated").textContent = (S.summary.live ? "Live data, updated " : "Saved data, updated ") + ago(S.summary.updated) + " (" + dt(S.summary.updated) + ")."; }, 10000);
+    liveTick();
+  }
+
   /* ---------- wiring ---------- */
 
   function setOn(group, attr, val) {
@@ -636,7 +868,7 @@
       $("updated").textContent = "Data not available yet. The first update runs shortly after setup.";
     });
     var done = 0;
-    function after() { if (++done === 4) refreshThumbs(); }
+    function after() { if (++done === 4) { refreshThumbs(); startLive(); } }
     get("data/positions.json").then(function (r) { S.positions = r; }).catch(function () {}).then(function () { renderList(); after(); });
     get("data/closed.json").then(function (r) { S.closed = r; }).catch(function () {}).then(function () { renderList(); after(); });
     get("data/activity.json").then(function (r) { S.activity = r; }).catch(function () {}).then(function () { renderList(); after(); });
