@@ -875,15 +875,15 @@
     renderPnl();
     renderList();
 
-    get("data/summary.json").then(function (s) { renderSummary(s); renderPnl(); }).catch(function () {
+    get("/data/summary.json").then(function (s) { renderSummary(s); renderPnl(); }).catch(function () {
       $("updated").textContent = "Data not available yet. The first update runs shortly after setup.";
     });
     var done = 0;
     function after() { if (++done === 4) { refreshThumbs(); startLive(); } }
-    get("data/positions.json").then(function (r) { S.positions = r; }).catch(function () {}).then(function () { renderList(); after(); });
-    get("data/closed.json").then(function (r) { S.closed = r; }).catch(function () {}).then(function () { renderList(); after(); });
-    get("data/activity.json").then(function (r) { S.activity = r; }).catch(function () {}).then(function () { renderList(); after(); });
-    get("data/pnl.json").then(function (r) { S.pnl = r; renderTotalPnl(); renderPnl(); }).catch(function () {}).then(after);
+    get("/data/positions.json").then(function (r) { S.positions = r; }).catch(function () {}).then(function () { renderList(); after(); });
+    get("/data/closed.json").then(function (r) { S.closed = r; }).catch(function () {}).then(function () { renderList(); after(); });
+    get("/data/activity.json").then(function (r) { S.activity = r; }).catch(function () {}).then(function () { renderList(); after(); });
+    get("/data/pnl.json").then(function (r) { S.pnl = r; renderTotalPnl(); renderPnl(); }).catch(function () {}).then(after);
   }
 
   if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", start);
