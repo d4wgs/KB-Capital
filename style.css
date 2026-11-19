@@ -1,0 +1,248 @@
+/* KB Capital — a live New York market clock.
+   Palette: paper #E8ECEE, ink #101A24, session green #0E6B5A, closed rust #B04A33. */
+
+:root {
+  --paper: #E8ECEE;
+  --ink: #101A24;
+  --muted: #4F5E69;
+  --rule: #C3CCD2;
+  --track: #D3DADF;
+  --open: #0E6B5A;
+  --closed: #B04A33;
+  --session: rgba(14, 107, 90, 0.28);
+  --font: "Schibsted Grotesk", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --paper: #0D151C;
+    --ink: #E4EAEE;
+    --muted: #9AA8B3;
+    --rule: #25323C;
+    --track: #1C2832;
+    --open: #4CC2A8;
+    --closed: #E98B72;
+    --session: rgba(76, 194, 168, 0.3);
+  }
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  min-height: 100dvh;
+  display: flex;
+  flex-direction: column;
+  background: var(--paper);
+  color: var(--ink);
+  font-family: var(--font);
+  font-size: 1.0625rem;
+  line-height: 1.6;
+}
+
+main,
+.top,
+.foot {
+  width: 100%;
+  max-width: 72rem;
+  margin-inline: auto;
+  padding-inline: clamp(1.25rem, 5vw, 3rem);
+}
+
+main {
+  flex: 1;
+}
+
+a {
+  color: inherit;
+  text-underline-offset: 0.2em;
+}
+
+a:focus-visible {
+  outline: 3px solid var(--open);
+  outline-offset: 3px;
+  border-radius: 2px;
+}
+
+/* Header */
+
+.top {
+  padding-top: clamp(1.25rem, 4vw, 2.5rem);
+}
+
+.mark {
+  font-weight: 700;
+  font-size: 1.125rem;
+  letter-spacing: -0.01em;
+  text-decoration: none;
+}
+
+/* Clock */
+
+.clock {
+  padding-block: clamp(3rem, 12vh, 7rem) clamp(3rem, 9vh, 5rem);
+}
+
+.place {
+  margin: 0 0 0.25rem;
+  color: var(--muted);
+  font-weight: 500;
+}
+
+.time {
+  margin: 0;
+  font-weight: 600;
+  font-size: clamp(3rem, 15vw, 10.5rem);
+  line-height: 0.95;
+  letter-spacing: -0.045em;
+  font-variant-numeric: tabular-nums lining-nums;
+  white-space: nowrap;
+}
+
+.time .ampm {
+  margin-left: 0.12em;
+  font-size: 0.3em;
+  font-weight: 500;
+  letter-spacing: 0;
+  color: var(--muted);
+}
+
+.status {
+  display: flex;
+  align-items: baseline;
+  gap: 0.65rem;
+  max-width: 40rem;
+  margin: 1.5rem 0 0;
+  font-size: clamp(1.125rem, 2.4vw, 1.375rem);
+  line-height: 1.45;
+}
+
+.dot {
+  flex: none;
+  width: 0.7rem;
+  height: 0.7rem;
+  border-radius: 50%;
+  background: var(--muted);
+  transform: translateY(-0.05em);
+}
+
+.status[data-state="open"] .dot {
+  background: var(--open);
+}
+
+.status[data-state="closed"] .dot {
+  background: var(--closed);
+}
+
+/* 24-hour strip */
+
+.strip {
+  position: relative;
+  height: 0.875rem;
+  margin-top: clamp(2.5rem, 7vh, 4rem);
+  background: var(--track);
+  border-radius: 2px;
+}
+
+.strip .session {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  background: var(--session);
+  border-inline: 2px solid var(--open);
+}
+
+.strip .session.is-off {
+  display: none;
+}
+
+.strip .now {
+  position: absolute;
+  top: -0.5rem;
+  bottom: -0.5rem;
+  width: 2px;
+  margin-left: -1px;
+  background: var(--ink);
+}
+
+.strip .now::after {
+  content: "";
+  position: absolute;
+  top: -0.25rem;
+  left: 50%;
+  width: 0.6rem;
+  height: 0.6rem;
+  margin-left: -0.3rem;
+  border-radius: 50%;
+  background: var(--ink);
+}
+
+.ticks {
+  display: flex;
+  justify-content: space-between;
+  margin: 0.9rem 0 0;
+  padding: 0;
+  list-style: none;
+  color: var(--muted);
+  font-size: 0.875rem;
+  font-variant-numeric: tabular-nums;
+}
+
+/* Content blocks */
+
+.block {
+  display: grid;
+  gap: 0.5rem 3rem;
+  padding-block: 2rem;
+  border-top: 1px solid var(--rule);
+}
+
+.block h2 {
+  margin: 0;
+  font-size: 1.0625rem;
+  font-weight: 600;
+}
+
+.block p {
+  max-width: 38rem;
+  margin: 0;
+}
+
+.block[hidden] {
+  display: none;
+}
+
+@media (min-width: 48rem) {
+  .block {
+    grid-template-columns: 12rem 1fr;
+  }
+}
+
+/* Footer */
+
+.foot {
+  padding-block: 1.5rem 2.5rem;
+  color: var(--muted);
+  font-size: 0.875rem;
+  line-height: 1.55;
+}
+
+.foot p {
+  max-width: 46rem;
+  margin: 0;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * {
+    scroll-behavior: auto !important;
+  }
+}

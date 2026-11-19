@@ -1,0 +1,58 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>KB Capital</title>
+  <meta name="description" content="KB Capital is a private investment partnership.">
+  <meta name="color-scheme" content="light dark">
+  <meta property="og:title" content="KB Capital">
+  <meta property="og:description" content="A private investment partnership.">
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='6' fill='%23101A24'/%3E%3Ctext x='16' y='22' font-size='15' font-family='sans-serif' font-weight='700' text-anchor='middle' fill='%23E8ECEE'%3EKB%3C/text%3E%3C/svg%3E">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Schibsted+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <header class="top">
+    <a class="mark" href="/">KB Capital</a>
+  </header>
+
+  <main>
+    <section class="clock" aria-labelledby="place">
+      <p class="place" id="place">New York</p>
+      <p class="time" id="time">--:--:--<span class="ampm"></span></p>
+      <p class="status" id="status"><span class="dot" id="dot"></span><span id="status-text">Checking market hours…</span></p>
+
+      <div class="strip" id="strip" role="img" aria-label="A 24-hour day in New York with the NYSE trading session shaded and the current time marked">
+        <div class="session" id="session"></div>
+        <div class="now" id="now"></div>
+      </div>
+      <ol class="ticks" aria-hidden="true">
+        <li>12 AM</li>
+        <li>6 AM</li>
+        <li>12 PM</li>
+        <li>6 PM</li>
+        <li>12 AM</li>
+      </ol>
+    </section>
+
+    <section class="block about">
+      <h2>About</h2>
+      <p>KB Capital is a private investment partnership.</p>
+    </section>
+
+    <section class="block contact" id="contact" hidden>
+      <h2>Contact</h2>
+      <p><a id="contact-link" href="#"></a></p>
+    </section>
+  </main>
+
+  <footer class="foot">
+    <p>&copy; <span id="year">2026</span> KB Capital. This site is for general information only. It is not an offer to sell, or a solicitation of an offer to buy, any security or interest in any fund.</p>
+  </footer>
+
+  <script src="script.js" defer></script>
+</body>
+</html>
