@@ -1,5 +1,5 @@
 {
- "updated": "2026-11-19T04:59:35Z",
+ "updated": "2026-11-19T05:04:22Z",
  "wallet": "0x03e1859bcc5293ff3e2c4e9cb483dc76048d5f2d",
  "total_value": 319.566261,
  "positions_value": 0.0,
@@ -24,8 +24,8 @@
   "open_cost": 0,
   "largest_position_pct": null,
   "markets_traded": 3,
-  "volume_usdc": 393.421226,
-  "trade_count": 6,
+  "volume_usdc": 557.935686,
+  "trade_count": 7,
   "net_deposits": 310.595367,
   "pnl_vs_deposits": 8.970893999999987
  }
