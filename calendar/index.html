@@ -1,0 +1,60 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>KB Capital | Calendar</title>
+  <meta name="description" content="Daily results for KB Capital's portfolio: green on days we hit the 1% target, red on days we did not.">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self'; style-src 'self' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data:; connect-src 'self'; base-uri 'none'; form-action 'none'">
+  <meta name="referrer" content="no-referrer">
+  <meta name="color-scheme" content="dark">
+  <meta name="theme-color" content="#1d2b39">
+  <link rel="canonical" href="https://kbcap.fund/calendar/">
+  <link rel="icon" type="image/png" href="/favicon.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/style.css?v=9">
+  <link rel="stylesheet" href="/calendar.css?v=2">
+</head>
+<body>
+  <main class="wrap">
+    <nav class="tabs" aria-label="Portfolio sections">
+      <a class="tab" href="/">About us</a>
+      <a class="tab" href="/predictions/">Predictions</a>
+      <a class="tab on" href="/calendar/" aria-current="page">Calendar</a>
+    </nav>
+
+    <section class="panel cal-card">
+      <div class="cal-head">
+        <div>
+          <h1 id="cal-title">Calendar</h1>
+          <p class="cal-sub" id="cal-sub">Loading…</p>
+        </div>
+        <div class="cal-nav">
+          <button type="button" id="prev" aria-label="Previous month">&lsaquo;</button>
+          <button type="button" id="next" aria-label="Next month">&rsaquo;</button>
+        </div>
+      </div>
+
+      <div class="cal-sum" id="cal-sum" aria-live="polite"></div>
+
+      <div class="cal-dow" aria-hidden="true"><span>Sun</span><span>Mon</span><span>Tue</span><span>Wed</span><span>Thu</span><span>Fri</span><span>Sat</span></div>
+      <div class="cal-grid" id="cal-grid" role="grid" aria-label="Daily results"></div>
+
+      <div class="cal-legend">
+        <span><i class="lg hit"></i>1%+ gained</span>
+        <span><i class="lg miss"></i>Under 1%</span>
+        <span><i class="lg none"></i>Before first trade / upcoming</span>
+      </div>
+    </section>
+  </main>
+
+  <footer class="foot">
+    <p id="updated"></p>
+    <p>&copy; 2026 KB Capital. Days are UTC. Daily % is the day's change in profit/loss divided by portfolio value at the start of the day (deposits plus profit to date). The current day is still in progress. Figures are marked values and refresh about every 15 minutes. Past results do not predict future results. Nothing here is investment advice. Not affiliated with Polymarket.</p>
+  </footer>
+
+  <script src="/calendar.js?v=1" defer></script>
+</body>
+</html>
