@@ -14,7 +14,7 @@
   function isNum(x) { return typeof x === "number" && isFinite(x); }
 
   function get(url) {
-    return fetch(url + "?v=" + Date.now(), { cache: "no-store" }).then(function (r) {
+    return fetch(url + "?v=" + Date.now(), { cache: "no-store", credentials: "omit" }).then(function (r) {
       if (!r.ok) throw new Error(url + " " + r.status);
       return r.json();
     });
@@ -50,6 +50,7 @@
     Object.keys(props || {}).forEach(function (k) {
       if (k === "text") n.textContent = props[k];
       else if (k === "class") n.className = props[k];
+      else if (k === "style") n.style.cssText = props[k]; // CSSOM, so it works under a strict CSP
       else n.setAttribute(k, props[k]);
     });
     (children || []).forEach(function (c) { if (c) n.appendChild(c); });
@@ -78,7 +79,12 @@
     var s = row.event_slug || row.slug;
     return validSlug(s) ? "https://polymarket.com/event/" + s : null;
   }
-  function safeImg(u) { return typeof u === "string" && /^https:\/\/[^\s"')]+$/.test(u) ? u : null; }
+  // Only load market pictures from Polymarket's own image host (so a bad API value can't make
+  // visitors' browsers contact other sites), and only with characters that are safe inside CSS url("...").
+  var IMG_HOST = "https://polymarket-upload.s3.us-east-2.amazonaws.com/";
+  function safeImg(u) {
+    return typeof u === "string" && u.indexOf(IMG_HOST) === 0 && /^https:\/\/[A-Za-z0-9._~\/%+-]+$/.test(u) ? u : null;
+  }
 
   /* ---------- state ---------- */
 
@@ -253,22 +259,31 @@
     try { var v = JSON.parse(x); return Array.isArray(v) ? v : []; } catch (e) { return []; }
   }
 
+  // Fetch market data once per slug. The in-flight request is remembered so a row opened
+  // while the page is still loading waits for it instead of reporting "unavailable".
+  var pending = {};
   function loadMarkets(slugs) {
-    var need = slugs.filter(function (s) { return validSlug(s) && !(s in S.market); });
-    need = need.filter(function (s, i) { return need.indexOf(s) === i; });
-    if (!need.length) return Promise.resolve();
-    need.forEach(function (s) { S.market[s] = null; });
-    var qs = need.map(function (s) { return "slug=" + encodeURIComponent(s); }).join("&");
+    var want = slugs.filter(function (s, i) { return validSlug(s) && slugs.indexOf(s) === i; });
+    var need = want.filter(function (s) { return !pending[s]; });
+    for (var i = 0; i < need.length; i += 20) fetchBatch(need.slice(i, i + 20));
+    return Promise.all(want.map(function (s) { return pending[s]; }));
+  }
+
+  function fetchBatch(batch) {
+    var qs = batch.map(function (s) { return "slug=" + encodeURIComponent(s); }).join("&");
     // The API returns open and closed markets separately, so ask for both.
     function one(extra) {
-      return fetch(GAMMA + "?" + qs + extra + "&limit=" + need.length)
+      return fetch(GAMMA + "?" + qs + extra + "&limit=" + batch.length, { credentials: "omit", referrerPolicy: "no-referrer" })
         .then(function (r) { if (!r.ok) throw new Error(r.status); return r.json(); })
         .then(function (list) {
-          (list || []).forEach(function (m) { if (m && m.slug) S.market[m.slug] = m; });
+          (Array.isArray(list) ? list : []).forEach(function (m) {
+            if (m && typeof m.slug === "string" && batch.indexOf(m.slug) >= 0) S.market[m.slug] = m;
+          });
         })
         .catch(function () { /* offline or blocked: rows still work from local data */ });
     }
-    return Promise.all([one(""), one("&closed=true")]);
+    var p = Promise.all([one(""), one("&closed=true")]);
+    batch.forEach(function (s) { pending[s] = p; });
   }
 
   function thumb(row) {

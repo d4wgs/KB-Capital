@@ -15,6 +15,7 @@ Writes to ./data:
 
 import json
 import os
+import re
 import sys
 import time
 import urllib.error
@@ -304,12 +305,15 @@ def load_json(path, default):
 
 
 def write_json(name, obj):
+    # Write atomically so a crash mid-write can never leave a half-written (invalid) JSON file.
     OUT.mkdir(parents=True, exist_ok=True)
-    (OUT / name).write_text(json.dumps(obj, indent=1, ensure_ascii=False) + "\n")
+    tmp = OUT / (name + ".tmp")
+    tmp.write_text(json.dumps(obj, indent=1, ensure_ascii=False) + "\n", encoding="utf-8")
+    os.replace(tmp, OUT / name)
 
 
 def main():
-    if not (WALLET.startswith("0x") and len(WALLET) == 42):
+    if not re.fullmatch(r"0x[0-9a-f]{40}", WALLET):
         sys.exit("WALLET_ADDRESS is missing or not a 0x... address. Set it in the repo's Actions variables.")
 
     now = datetime.now(timezone.utc)
@@ -351,6 +355,16 @@ def main():
     activity = [a for a in activity if a["time"] and datetime.fromisoformat(a["time"].replace("Z", "+00:00")).timestamp() <= cutoff]
     activity = activity[:500]
 
+    # The trade delay must cover everything that reveals a fresh trade, not just the activity feed.
+    # Hide positions and closed positions touched inside the delay window. (Account totals such as
+    # total value and cash still reflect "now"; they can't be delayed without being wrong.)
+    if TRADE_DELAY_HOURS > 0:
+        def settled(row):
+            ts = row.get("last_activity") or row.get("opened")
+            return not ts or datetime.fromisoformat(ts.replace("Z", "+00:00")).timestamp() <= cutoff
+        positions = [p for p in positions if settled(p)]
+        closed = [c for c in closed if settled(c)]
+
     # --- Stats / PnL series (best effort: never fail the run over these) ---
     stats, pnl_series = None, []
     try:
@@ -358,6 +372,8 @@ def main():
     except Exception as e:
         print(f"  user-stats unavailable: {e}", file=sys.stderr)
     pnl_ranges = build_pnl_ranges(now.timestamp(), activity_raw, positions)
+    if TRADE_DELAY_HOURS > 0:  # a P&L curve also reveals when trades happened
+        pnl_ranges = {k: [pt for pt in v if pt["t"] <= cutoff] for k, v in pnl_ranges.items()}
     pnl_series = pnl_ranges.get("all", [])
     volume = None
     try:
