@@ -1,9 +1,9 @@
 {
- "updated": "2026-11-19T14:30:23Z",
+ "updated": "2026-11-19T22:24:04Z",
  "wallet": "0x03e1859bcc5293ff3e2c4e9cb483dc76048d5f2d",
- "total_value": 319.566261,
+ "total_value": 269.566261,
  "positions_value": 0.0,
- "cash": 319.566261,
+ "cash": 269.566261,
  "trade_delay_hours": 0.0,
  "metrics": {
   "closed_count": 3,
@@ -26,7 +26,7 @@
   "markets_traded": 3,
   "volume_usdc": 557.935686,
   "trade_count": 7,
-  "net_deposits": 310.595367,
+  "net_deposits": 260.595367,
   "pnl_vs_deposits": 8.970893999999987
  }
 }
