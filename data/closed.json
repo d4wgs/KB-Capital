@@ -1,5 +1,27 @@
 [
  {
+  "title": "Will IShowSpeed finish GTA VI by November 21, 11:59 AM ET?",
+  "slug": "will-ishowspeed-finish-gta-vi-by-november-21-1159-am-et",
+  "event_slug": "ishowspeed-finishes-gta-vi-by",
+  "outcome": "Yes",
+  "status": "CLOSED",
+  "size": 0.0,
+  "total_size": 100.0,
+  "avg_price": 0.91,
+  "current_price": 0.9795,
+  "cost": 0.0,
+  "value": 0.0,
+  "realized_pnl": 2.0,
+  "unrealized_pnl": 0.0,
+  "total_pnl": 2.0,
+  "percent_pnl": 0.0,
+  "end_date": "2026-11-21",
+  "opened": "2026-11-20T04:41:59Z",
+  "last_activity": "2026-11-20T08:20:47Z",
+  "condition_id": "0xc28bbc5e58ad784d9cc01bba52528ccbdfcee85bdd3844c4a78e3a7d93e24e02",
+  "token_id": "11975539209630437358736384044282504528064496580329455977191961352716241052460"
+ },
+ {
   "title": "Anthropic IPO closing market cap above $1.1T?",
   "slug": "anthropic-ipo-closing-market-cap-above-1pt1t",
   "event_slug": "anthropic-ipo-closing-market-cap-above",
