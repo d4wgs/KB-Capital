@@ -29,9 +29,17 @@
 .day .p { font-weight: 700; font-size: max(.5rem, calc(var(--cell) * .19)); text-align: right; white-space: nowrap; line-height: 1; letter-spacing: -.02em; }
 .day.hit  { background: rgba(39,174,96,.22); border-color: #27ae60; color: #fff; }
 .day.miss { background: rgba(235,87,87,.20); border-color: #eb5757; color: #fff; }
+/* 0-1%: blend from the neutral gray box (t=0) to the 1%+ green box (t=1) */
+.day.gain {
+  --p: calc(var(--t, 0) * 100%);
+  background: color-mix(in srgb, rgba(39,174,96,.22) var(--p), transparent);
+  border-color: color-mix(in srgb, #27ae60 var(--p), var(--border));
+  color: color-mix(in srgb, #fff var(--p), var(--muted));
+}
+.day.flat { color: var(--muted); }
 .day.today { box-shadow: 0 0 0 2px var(--text); }
-.day.hit, .day.miss { cursor: default; transition: transform .12s, filter .12s; }
-.day.hit:hover, .day.hit:focus-visible, .day.miss:hover, .day.miss:focus-visible { transform: translateY(-2px); filter: brightness(1.2); z-index: 3; }
+.day.hit, .day.miss, .day.gain, .day.flat { cursor: default; transition: transform .12s, filter .12s; }
+.day.hit:hover, .day.hit:focus-visible, .day.miss:hover, .day.miss:focus-visible, .day.gain:hover, .day.gain:focus-visible, .day.flat:hover, .day.flat:focus-visible { transform: translateY(-2px); filter: brightness(1.2); z-index: 3; }
 
 /* hover card */
 .day .cal-tip {
@@ -56,6 +64,7 @@
 .cal-legend span { display: inline-flex; align-items: center; gap: .4rem; }
 .lg { width: .85rem; height: .85rem; border-radius: .2rem; border: 1px solid var(--border); }
 .lg.hit { background: rgba(39,174,96,.4); border-color: #27ae60; }
+.lg.gain { background: linear-gradient(90deg, transparent, rgba(39,174,96,.4)); border-color: #27ae60; }
 .lg.miss { background: rgba(235,87,87,.4); border-color: #eb5757; }
 
 @media (max-width: 600px) {

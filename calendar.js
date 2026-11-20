@@ -26,8 +26,9 @@
     });
   }
   function usd(x) { return x.toLocaleString("en-US", { style: "currency", currency: "USD" }); }
-  function sUsd(x) { return (x > 0 ? "+" : x < 0 ? "-" : "") + usd(Math.abs(x)); }
-  function sPct(x) { return (x > 0 ? "+" : x < 0 ? "-" : "") + Math.abs(x * 100).toFixed(2) + "%"; }
+  // Round first so a tiny float like -0.000001 shows as $0.00 / 0.00% with no sign.
+  function sUsd(x) { var c = Math.round(x * 100); return (c > 0 ? "+" : c < 0 ? "-" : "") + usd(Math.abs(c) / 100); }
+  function sPct(x) { var c = Math.round(x * 10000); return (c > 0 ? "+" : c < 0 ? "-" : "") + (Math.abs(c) / 100).toFixed(2) + "%"; }
   function dayNum(sec) { return Math.floor(sec / DAY); }           // UTC day index
   function ymd(dn) { var d = new Date(dn * DAY * 1000); return { y: d.getUTCFullYear(), m: d.getUTCMonth(), d: d.getUTCDate(), w: d.getUTCDay() }; }
   function dayOf(y, m, d) { return Math.floor(Date.UTC(y, m, d) / (DAY * 1000)); }
@@ -106,7 +107,11 @@
       var dn = dayOf(view.y, view.m, i), r = days[dn];
       var box = el("div", { class: "day", role: "gridcell" }, [el("span", { class: "n", text: String(i) })]);
       if (r) {
-        box.className += r.hit ? " hit" : " miss";
+        var rp = Math.round(r.pct * 10000);   // hundredths of a percent
+        if (r.hit) box.className += " hit";
+        else if (rp < 0) box.className += " miss";
+        else if (rp > 0) { box.className += " gain"; box.style.setProperty("--t", String(r.pct / TARGET)); }
+        else box.className += " flat";
         box.setAttribute("tabindex", "0");
         box.setAttribute("aria-label", MONTHS[view.m] + " " + i + ": " + sUsd(r.delta) + ", " + sPct(r.pct) + (r.hit ? ", hit target" : ", under target"));
         box.appendChild(el("span", { class: "p", text: sPct(r.pct) }));
