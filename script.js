@@ -38,6 +38,11 @@
     if (x >= 1e4) return "$" + (x / 1e3).toFixed(1) + "K";
     return usd(x, 0);
   }
+  // Exact to the cent below $1,000, whole dollars below $10K, then K/M, like Polymarket's own market stats.
+  function money(x) {
+    if (!isNum(x)) return "--";
+    return x < 1000 ? usd(x, 2) : compact(x);
+  }
   function cents(x) {
     var n = Number(x);
     return x !== null && x !== "" && x !== undefined && isFinite(n) ? (Math.round(n * 1000) / 10) + "¢" : "--";
@@ -92,7 +97,8 @@
     summary: null, positions: [], closed: [], activity: [], pnl: null,
     view: "positions", status: "active", q: "", sort: { active: "value", closed: "recent" },
     shownPos: PAGE, shownAct: PAGE, range: "1d",
-    market: {} // slug -> gamma market (or null)
+    market: {}, // slug -> gamma market (or null)
+    marketAt: {} // slug -> when that market data was fetched (ms)
   };
 
   /* ---------- profile card ---------- */
@@ -281,7 +287,7 @@
         .then(function (r) { if (!r.ok) throw new Error(r.status); return r.json(); })
         .then(function (list) {
           (Array.isArray(list) ? list : []).forEach(function (m) {
-            if (m && typeof m.slug === "string" && batch.indexOf(m.slug) >= 0) S.market[m.slug] = m;
+            if (m && typeof m.slug === "string" && batch.indexOf(m.slug) >= 0) { S.market[m.slug] = m; S.marketAt[m.slug] = Date.now(); }
           });
         })
         .catch(function () { /* offline or blocked: rows still work from local data */ });
@@ -337,6 +343,7 @@
     left.appendChild(descBox);
 
     var m = S.market[row.slug];
+    var extra = []; // market stat rows added by fillMarket
     function fillMarket(m) {
       outsBox.textContent = "";
       var names = parseList(m.outcomes), prices = parseList(m.outcomePrices);
@@ -351,14 +358,21 @@
         ]));
       });
       if (m.description) descBox.textContent = m.description;
+      // Replace (not add to) the market stats, so a refresh never duplicates them.
+      extra.forEach(function (n) { n.remove(); });
+      extra = [];
       var more = [];
       var vol = Number(m.volumeNum != null ? m.volumeNum : m.volume);
-      var liq = Number(m.liquidityNum != null ? m.liquidityNum : m.liquidity);
-      if (isFinite(vol)) more.push(fact("Market volume", compact(vol)));
-      if (isFinite(liq)) more.push(fact("Liquidity", compact(liq)));
+      var liq = Number(m.liquidityClob != null ? m.liquidityClob : (m.liquidityNum != null ? m.liquidityNum : m.liquidity));
+      var ev = m.events && m.events[0];
+      var evVol = ev ? Number(ev.volume) : NaN;
+      if (isFinite(vol)) more.push(fact("Market volume", money(vol)));
+      if (isFinite(liq)) more.push(fact("Market liquidity", money(liq)));
+      // Polymarket's page headline is the whole event's volume; show it too so the two aren't confused.
+      if (isFinite(evVol) && ev.slug !== m.slug && Math.abs(evVol - vol) > 0.5) more.push(fact("Event volume (all markets)", money(evVol)));
       more.push(fact("Market status", m.closed ? "Closed" : (m.active === false ? "Inactive" : "Open")));
       if (m.endDate) more.push(fact("Resolves", d(m.endDate)));
-      more.forEach(function (n) { facts.appendChild(n); });
+      more.forEach(function (n) { facts.appendChild(n); extra.push(n); });
     }
 
     var facts = el("dl", { class: "facts" });
@@ -391,13 +405,17 @@
     if (url) facts.appendChild(fact("Polymarket", "", true, el("a", { href: url, target: "_blank", rel: "noopener noreferrer", text: "View market on polymarket.com ↗" })));
 
     if (m) fillMarket(m);
-    else if (validSlug(row.slug)) {
-      outsBox.appendChild(el("p", { class: "d-loading", text: "Loading market data…" }));
-      loadMarkets([row.slug]).then(function () {
-        outsBox.textContent = "";
-        if (S.market[row.slug]) fillMarket(S.market[row.slug]);
-        else outsBox.appendChild(el("p", { class: "d-loading", text: "Live market data unavailable right now." }));
-      });
+    if (validSlug(row.slug)) {
+      var stale = !m || Date.now() - (S.marketAt[row.slug] || 0) > 30000; // volume and liquidity move; re-read when opened
+      if (!m) outsBox.appendChild(el("p", { class: "d-loading", text: "Loading market data…" }));
+      if (stale) {
+        if (m) delete pending[row.slug];
+        loadMarkets([row.slug]).then(function () {
+          var fresh = S.market[row.slug];
+          if (fresh) fillMarket(fresh);
+          else if (!m) { outsBox.textContent = ""; outsBox.appendChild(el("p", { class: "d-loading", text: "Live market data unavailable right now." })); }
+        });
+      }
     }
     return wrap;
   }

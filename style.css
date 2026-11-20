@@ -203,7 +203,7 @@ h1 { font-size: 1.5rem; font-weight: 600; letter-spacing: -.01em; overflow: hidd
 .out .bar i { display: block; height: 100%; background: var(--green); border-radius: 99px; }
 .out:nth-child(2) .bar i { background: var(--red); }
 .out span { width: 2.75rem; text-align: right; font-weight: 600; }
-.out.mine b::after { content: " â€¢"; color: var(--accent); }
+.out.mine b::after { content: " \2022"; color: var(--accent); }
 .desc { color: var(--muted); font-size: .78rem; max-height: 4.4em; overflow: hidden; }
 .facts { display: grid; grid-template-columns: 1fr 1fr; gap: .75rem 1.25rem; align-content: start; }
 .facts div { min-width: 0; }
