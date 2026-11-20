@@ -103,6 +103,29 @@
 
   /* ---------- profile card ---------- */
 
+  function utcStamp(value) {
+    var t = Date.parse(value);
+    return isFinite(t) ? new Date(t).toISOString().slice(0, 19).replace("T", " ") : "--";
+  }
+
+  function renderSavedReturn(s) {
+    var capital = (s.metrics || {}).net_deposits;
+    var gain = isNum(s.total_value) && isNum(capital) ? s.total_value - capital : null;
+    $("track-nav").textContent = usd(s.total_value);
+    $("track-capital").textContent = usd(capital);
+    $("track-gain").textContent = signedUsd(gain);
+    $("track-return").textContent = isNum(gain) && capital > 0
+      ? (gain > 0 ? "+" : "") + (100 * gain / capital).toFixed(2) + "%" : "--";
+    $("track-time").textContent = utcStamp(s.updated);
+  }
+
+  function renderLatestFill() {
+    var latest = S.activity.reduce(function (last, row) {
+      return row.type === "TRADE" && row.time > last ? row.time : last;
+    }, "");
+    $("track-fill").textContent = utcStamp(latest);
+  }
+
   function renderSummary(s) {
     S.summary = s;
     var m = s.metrics || {};
@@ -473,9 +496,7 @@
       val.appendChild(el("small", { class: "muted", text: d(p.last_activity) }));
     } else {
       val = el("div", { class: "num r" }, [document.createTextNode(usd(p.value))]);
-      var pc = Number(p.percent_pnl);
-      var tag = signedUsd(p.unrealized_pnl) + (p.percent_pnl != null && isFinite(pc) ? " (" + (pc > 0 ? "+" : "") + pc.toFixed(1) + "%)" : "");
-      val.appendChild(el("small", { class: cls(p.unrealized_pnl), text: tag }));
+      val.appendChild(el("small", { class: cls(p.total_pnl), text: signedUsd(p.total_pnl) + " total P&L" }));
     }
     return makeRow(p, kind, [mkt, avg, cur, val]);
   }
@@ -700,7 +721,6 @@
       m.open_count = pos.length;
       m.open_cost = pos.reduce(function (t, p) { return t + p.cost; }, 0);
       m.unrealized_pnl = pos.reduce(function (t, p) { return t + p.unrealized_pnl; }, 0);
-      m.total_pnl = (m.realized_pnl || 0) + m.unrealized_pnl;
       m.largest_position_pct = pv > 0 ? Math.max.apply(null, pos.map(function (p) { return p.value; }).concat(0)) / pv : null;
     }
     if (isNum(r.cash)) s.cash = r.cash;
@@ -722,12 +742,12 @@
       var cl = mergeRows(r.closed.data.map(slimPos), S.closed, "last_activity");
       if (JSON.stringify(cl) !== JSON.stringify(S.closed)) { S.closed = cl; changed = true; }
       var wins = cl.filter(function (c) { return c.realized_pnl > 0; }), losses = cl.filter(function (c) { return c.realized_pnl < 0; });
-      var realized = cl.reduce(function (t, c) { return t + c.realized_pnl; }, 0);
       m.closed_count = cl.length; m.wins = wins.length; m.losses = losses.length;
-      m.realized_pnl = realized; m.total_pnl = realized + (m.unrealized_pnl || 0);
       var best = cl.reduce(function (b, c) { return !b || c.realized_pnl > b.realized_pnl ? c : b; }, null);
       if (best) { m.best = best.realized_pnl; m.best_title = best.title; }
     }
+    m.realized_pnl = S.closed.concat(S.positions).reduce(function (sum, row) { return sum + row.realized_pnl; }, 0);
+    m.total_pnl = m.realized_pnl + (m.unrealized_pnl || 0);
     if (r.volume && r.volume.data && isNum(Number(r.volume.data.volume_usdc))) m.volume_usdc = Number(r.volume.data.volume_usdc);
     if (r.stats && r.stats.data && isNum(Number(r.stats.data.trades))) m.markets_traded = Number(r.stats.data.trades);
 
@@ -737,6 +757,7 @@
 
     s.updated = new Date().toISOString().replace(/\.\d+Z$/, "Z");
     s.live = true;
+    renderLatestFill();
     renderSummary(s);
     renderPnl();
     pageDirty(changed);
@@ -804,7 +825,7 @@
   }
 
   function startLive() {
-    if (L.started) return;
+    if (L.started || !S.summary || S.summary.trade_delay_hours > 0) return;
     L.started = true;
     setLiveBadge("saved");
     document.addEventListener("visibilitychange", function () {
@@ -896,14 +917,14 @@
     renderPnl();
     renderList();
 
-    get("/data/summary.json").then(function (s) { renderSummary(s); renderPnl(); }).catch(function () {
+    get("/data/summary.json").then(function (s) { renderSavedReturn(s); renderSummary(s); renderPnl(); }).catch(function () {
       $("updated").textContent = "Data not available yet. The first update runs shortly after setup.";
-    });
+    }).then(after);
     var done = 0;
-    function after() { if (++done === 4) { refreshThumbs(); startLive(); } }
+    function after() { if (++done === 5) { refreshThumbs(); startLive(); } }
     get("/data/positions.json").then(function (r) { S.positions = r; }).catch(function () {}).then(function () { renderList(); after(); });
     get("/data/closed.json").then(function (r) { S.closed = r; }).catch(function () {}).then(function () { renderList(); after(); });
-    get("/data/activity.json").then(function (r) { S.activity = r; }).catch(function () {}).then(function () { renderList(); after(); });
+    get("/data/activity.json").then(function (r) { S.activity = r; renderLatestFill(); }).catch(function () {}).then(function () { renderList(); after(); });
     get("/data/pnl.json").then(function (r) { S.pnl = r; renderTotalPnl(); renderPnl(); }).catch(function () {}).then(after);
   }
 

@@ -387,7 +387,7 @@ def main():
     gross_win = sum(c["realized_pnl"] for c in wins)
     gross_loss = -sum(c["realized_pnl"] for c in losses)
     decided = len(wins) + len(losses)
-    realized_total = sum(c["realized_pnl"] for c in closed)
+    realized_total = sum(p["realized_pnl"] for p in closed + positions)
     unrealized_total = sum(p["unrealized_pnl"] for p in positions)
     open_cost = sum(p["cost"] for p in positions)
     total_value = (positions_value or 0) + (cash or 0) if cash is not None else None

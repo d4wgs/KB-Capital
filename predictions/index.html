@@ -26,7 +26,7 @@
   <main class="wrap">
     <nav class="tabs" aria-label="Portfolio sections">
       <a class="tab" href="/">About us</a>
-      <a class="tab on" href="/predictions/" aria-current="page">Predictions</a>
+      <a class="tab on" href="/predictions/" aria-current="page">Track record</a>
       <a class="tab" href="/calendar/">Calendar</a>
       <span class="live saved" id="live" role="status" aria-live="polite"><i aria-hidden="true"></i><b>Saved data</b></span>
     </nav>
@@ -49,13 +49,24 @@
             </button>
           </div>
         </div>
+        <h2>Since inception</h2>
+        <p class="big" id="track-return">--</p>
+        <p class="cap">Return on net contributions</p>
+        <dl class="kv">
+          <div><dt>Marked portfolio value</dt><dd id="track-nav">--</dd></div>
+          <div><dt>Net contributions</dt><dd id="track-capital">--</dd></div>
+          <div><dt>Total gain / loss</dt><dd id="track-gain">--</dd></div>
+          <div><dt>Saved snapshot (UTC)</dt><dd id="track-time">--</dd></div>
+          <div><dt>Latest observed fill (UTC)</dt><dd id="track-fill">--</dd></div>
+        </dl>
+        <p class="meta">The saved return divides cash plus marked holdings, less net contributions, by net contributions. It includes open positions. Later fills enter this figure at the next saved valuation.</p>
         <div class="stats3">
           <div><p class="big" id="s-positions">--</p><p class="cap">Positions Value</p></div>
           <div><p class="big" id="s-best">--</p><p class="cap">Biggest Win</p></div>
           <div><p class="big" id="s-markets">--</p><p class="cap">Markets Traded</p></div>
         </div>
         <dl class="kv">
-          <div><dt>Total PnL</dt><dd id="s-pnl">--</dd></div>
+          <div><dt>Exchange P&amp;L</dt><dd id="s-pnl">--</dd></div>
           <div><dt>Total Volume</dt><dd id="s-volume">--</dd></div>
           <div><dt>Cash</dt><dd id="s-cash">--</dd></div>
         </dl>
@@ -121,9 +132,9 @@
 
   <footer class="foot">
     <p id="updated">Loading…</p>
-    <p>&copy; <span id="year">2026</span> KB Capital. A private portfolio of personal funds. Not accepting outside capital. Data comes from Polymarket's public APIs and refreshes about every 30 minutes. Figures are marked values, not guaranteed. Past results do not predict future results. Nothing here is investment advice, an offer to sell, or a solicitation of an offer to buy any security or interest in any fund. Not affiliated with Polymarket.</p>
+    <p>&copy; <span id="year">2026</span> KB Capital. A private portfolio of personal funds. Not accepting outside capital. Data comes from Polymarket's public APIs and is polled about every 30 seconds while this page is open. Saved snapshots are scheduled every 15 minutes. Figures are marked values, not guaranteed. Past results do not predict future results. Nothing here is investment advice, an offer to sell, or a solicitation of an offer to buy any security or interest in any fund. Not affiliated with Polymarket.</p>
   </footer>
 
-  <script src="/script.js?v=11" defer></script>
+  <script src="/script.js?v=12" defer></script>
 </body>
 </html>
