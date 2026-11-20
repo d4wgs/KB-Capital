@@ -19,5 +19,12 @@
   "positions": 0,
   "cash": 269.57,
   "net_deposits": 260.6
+ },
+ {
+  "t": "2026-11-20T03:41:25Z",
+  "total": 269.57,
+  "positions": 0,
+  "cash": 269.57,
+  "net_deposits": 260.6
  }
 ]
