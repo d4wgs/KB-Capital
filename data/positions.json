@@ -1,1 +1,24 @@
-[]
+[
+ {
+  "title": "Anthropic: Above IPO Price at End of First Month?",
+  "slug": "anthropic-ipo-above-ipo-price-at-end-of-first-month",
+  "event_slug": "anthropic-ipo-above-ipo-price-at-end-of-first-month",
+  "outcome": "Down",
+  "status": "OPEN",
+  "size": 213.0,
+  "total_size": 213.0,
+  "avg_price": 0.47,
+  "current_price": 0.535,
+  "cost": 100.11,
+  "value": 113.955,
+  "realized_pnl": 0.0,
+  "unrealized_pnl": 13.845,
+  "total_pnl": 13.845,
+  "percent_pnl": 13.8297,
+  "end_date": "2026-12-01",
+  "opened": "2026-11-20T19:32:17Z",
+  "last_activity": "2026-11-20T19:32:17Z",
+  "condition_id": "0xddfe2bd93341f59585239a2c771e23fc0e7ae4595049c6e50494c48aac0c3d72",
+  "token_id": "73907667086812556494284430569654881771170554798809383394811042681537293950058"
+ }
+]
