@@ -319,3 +319,42 @@ body.fit .thead { padding-top: .5rem; }
   body.fit .pl-chart { height: 4.5rem; }
   body.fit .stats3 { padding-top: .45rem; }
 }
+
+/* Public portfolio report */
+.record {
+  --muted: #a8b5bf;
+  --border: #40505d;
+  --accent: #a5c3c6;
+  --gutter: clamp(1rem, 2.3vw, 1.65rem);
+  font-variant-numeric: tabular-nums;
+}
+.record .who { padding: 1rem 0 1.35rem; border: 0; }
+.record .who h1, .record .panel h2 {
+  font-family: Georgia, "Times New Roman", serif;
+  font-weight: 400;
+  margin: 0;
+}
+.record .who h1 { font-size: clamp(2rem, 4vw, 3rem); line-height: 1.1; }
+.record .who .meta { margin-top: .4rem; }
+.record .panel { padding: var(--gutter); border-radius: .35rem; min-width: 0; }
+.record .panel h2 { font-size: 1.38rem; }
+.record #track-return { margin: 1rem 0 0; font-size: clamp(2.4rem, 4vw, 3.55rem); line-height: 1.1; }
+.record .profile .cap { margin-bottom: 1.25rem; }
+.record .kv { margin: 0; padding: .9rem 0; gap: .65rem; }
+.record .kv dd { text-align: right; margin: 0; }
+.record .profile > .meta { border-top: 1px solid var(--border); padding-top: .9rem; line-height: 1.55; }
+.record .stats3 { padding: .75rem 0; text-align: left; }
+.record .stats3 .big { font-size: 1.05rem; }
+.record .exchange-title { border-top: 1px solid var(--border); padding-top: .85rem; }
+.record .pl-chart { height: clamp(8rem, 14vw, 12rem); }
+.record .pl-chart .ln { stroke: var(--accent); }
+.record .pl-chart .ar { fill: var(--accent); opacity: .06; }
+.record .pl-foot { margin-bottom: .9rem; }
+.record .live.live i { animation: none; }
+.record .toolbar { border-radius: .35rem; }
+@media (min-width: 801px) {
+  .record .top-grid { grid-template-columns: minmax(0, .9fr) minmax(0, 1.1fr); align-items: start; }
+}
+@media (max-width: 800px) {
+  .record .top-grid { grid-template-columns: minmax(0, 1fr); }
+}

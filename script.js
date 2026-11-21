@@ -135,7 +135,7 @@
     $("s-volume").textContent = isNum(m.volume_usdc) ? usd(m.volume_usdc) : "--";
     $("s-cash").textContent = usd(s.cash);
     renderTotalPnl();
-    if (s.wallet) $("meta").textContent = "Joined Nov 2026 · " + s.wallet.slice(0, 6) + "…" + s.wallet.slice(-4);
+    if (s.wallet) $("meta").textContent = "Polymarket portfolio · " + s.wallet.slice(0, 6) + "…" + s.wallet.slice(-4);
     $("updated").textContent = s.updated ? (s.live ? "Live data, updated " : "Saved data, updated ") + ago(s.updated) + " (" + dt(s.updated) + ")." : "";
   }
 
@@ -899,19 +899,8 @@
     else window.addEventListener("resize", function () { clearTimeout(timer); timer = setTimeout(redraw, 120); });
   }
 
-  // Swap the tab title while the page isn't being looked at (tab hidden, or its window not focused).
-  var TITLE_ACTIVE = document.title;
-  var TITLE_AWAY = "Your $ is better in our hands";
-  function syncTitle() {
-    document.title = document.hidden || !document.hasFocus() ? TITLE_AWAY : TITLE_ACTIVE;
-  }
-  document.addEventListener("visibilitychange", syncTitle);
-  window.addEventListener("blur", syncTitle);
-  window.addEventListener("focus", syncTitle);
-
   function start() {
     $("year").textContent = String(new Date().getFullYear());
-    syncTitle();
     wire();
     fillSortOptions();
     renderPnl();
