@@ -1,0 +1,38 @@
+/* Ink, paper, and rules shared by all three portfolio pages. */
+:root, body.record {
+  color-scheme: light;
+  --bg: #fff;
+  --panel: #fff;
+  --surface: #f6f6f6;
+  --text: #171717;
+  --body: #393939;
+  --text-2: #555;
+  --muted: #595959;
+  --border: #cdcdcd;
+  --soft: #ededed;
+  --hover: #f6f6f6;
+  --green: #171717;
+  --red: #404040;
+  --accent: #202020;
+  --blue: #202020;
+  --blue-hover: #111;
+  --seg: #eee;
+}
+.topnav a:hover, .topnav a.on { color: var(--text); }
+.topnav a.on::after { background: var(--text); }
+.curve .base { stroke: var(--border); }
+.tbl thead th { border-color: var(--border); }
+.record .panel { border-radius: 0; border-top: 2px solid var(--text); }
+.record .pill, .record .pill.no { background: var(--soft); color: var(--text); }
+.record .ranges button.on { background: var(--text); color: var(--bg); }
+.record .live.live i { box-shadow: none; }
+.record .day.hit, .record .lg.hit { background: #242424; border-color: #242424; color: white; }
+.record .day.gain, .record .lg.gain { background: #dedede; border-color: #888; color: #171717; }
+.record .day.miss, .record .lg.miss {
+  background: repeating-linear-gradient(135deg, white 0 4px, #e3e3e3 4px 5px);
+  color: #171717;
+  border-color: #888;
+}
+.record .day.today { outline: 2px solid #111; outline-offset: 1px; box-shadow: none; }
+.record .cal-tip { background: white; color: #171717; border-color: #888; box-shadow: 0 3px 12px #0002; }
+.record .cal-tip .st { color: #171717; }
