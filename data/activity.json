@@ -1,5 +1,18 @@
 [
  {
+  "time": "2026-11-20T22:32:32Z",
+  "type": "TRADE",
+  "side": "SELL",
+  "title": "Anthropic: Above IPO Price at End of First Month?",
+  "slug": "anthropic-ipo-above-ipo-price-at-end-of-first-month",
+  "event_slug": "anthropic-ipo-above-ipo-price-at-end-of-first-month",
+  "outcome": "Down",
+  "shares": 119.976563,
+  "usdc": 76.785,
+  "price": 0.6399999973,
+  "tx": "0x28d4c90d70530e1b6cd84c014bc11e354c4fab7c1146a4830f59279264439760"
+ },
+ {
   "time": "2026-11-20T19:32:17Z",
   "type": "TRADE",
   "side": "BUY",
