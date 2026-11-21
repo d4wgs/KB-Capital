@@ -419,6 +419,10 @@ def main():
 
     summary = {
         "updated": now_s,
+        "capital_flows": sorted(
+            [{"t": ts_s(a["timestamp"]), "amount": num(a["usdc_size"]) * (1 if a["type"] == "DEPOSIT" else -1)}
+             for a in transfers], key=lambda flow: flow["t"]
+        ) if net_deposits is not None else None,
         "wallet": WALLET,
         "total_value": total_value,
         "positions_value": positions_value,

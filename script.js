@@ -173,7 +173,7 @@
       .sort(function (a, b) { return a.t - b.t; });
     // Extend the line to "now": with the live P&L figure when we have it (not for the rebuilt 1H view,
     // which is on a different basis), otherwise by carrying the last value forward.
-    if (pts.length && end > pts[pts.length - 1].t) {
+    if (range !== "1h" && S.livePnl != null && pts.length && end > pts[pts.length - 1].t) {
       pts.push({ t: end, v: range !== "1h" && S.livePnl != null ? S.livePnl : pts[pts.length - 1].v });
     }
     if (range === "all") {
@@ -214,6 +214,14 @@
     return p;
   }
 
+  // Target earnings only: external cash earns the strategy rate from its transfer time.
+  function targetProfit(flows, time) {
+    return flows.reduce(function (profit, flow) {
+      var days = (time - flow.t * 1000) / 86400000;
+      return days > 0 ? profit + flow.amount * Math.expm1(Math.log1p(.01) * days) : profit;
+    }, 0);
+  }
+
   function renderPnl() {
     var box = $("pl-chart");
     box.textContent = "";
@@ -235,7 +243,21 @@
     var xs = pts.map(function (p) { return p.t; });
     var ys = pts.map(function (p) { return p.v; });
     var x0 = xs[0], x1 = xs[xs.length - 1];
-    var lo = Math.min.apply(null, ys.concat(0)), hi = Math.max.apply(null, ys.concat(0));
+    var flows = S.summary && S.summary.capital_flows;
+    var available = Array.isArray(flows) && flows.length && S.pnl && S.pnl[S.range] && S.pnl[S.range].length;
+    var targets = [];
+    if (available) {
+      var base = S.range === "all" ? 0 : targetProfit(flows, x0);
+      targets = xs.map(function (time) { return targetProfit(flows, time) - base; });
+    }
+    var target = targets.length ? targets[targets.length - 1] : null;
+    var gap = target === null ? null : last - target;
+    $("pl-target").textContent = signedUsd(target);
+    $("pl-gap").textContent = signedUsd(gap);
+    $("pl-gap").className = cls(gap);
+    $("pl-foot").textContent = available ? label + " · through " + dt(new Date(x1).toISOString()) : label + " · target comparison unavailable";
+    var domain = ys.concat(targets, 0);
+    var lo = Math.min.apply(null, domain), hi = Math.max.apply(null, domain);
     if (hi === lo) { hi = lo + 1; }
     var pad = (hi - lo) * 0.08; lo -= pad; hi += pad;
 
@@ -260,6 +282,8 @@
     var path = smoothPath(px, py);
     root.appendChild(svg("path", { class: "ar", fill: "url(#plFill)", d: path + " L" + W + " " + (H - B) + " L0 " + (H - B) + " Z" }));
     root.appendChild(svg("path", { class: "ln", d: path, "vector-effect": "non-scaling-stroke" }));
+
+    if (targets.length) root.appendChild(svg("path", { class: "target-line", d: smoothPath(px, targets.map(Y)), "vector-effect": "non-scaling-stroke" }));
 
     var hv = svg("line", { class: "hv", y1: T, y2: H - B, x1: 0, x2: 0, visibility: "hidden" });
     var dot = svg("circle", { class: "dot", r: 5, cx: 0, cy: 0, visibility: "hidden" });
@@ -801,6 +825,21 @@
       keys.forEach(function (k, i) { r[k] = vals[i]; });
       r.open = { data: (r.open && r.open.data) || [], pagination: r.open && r.open.pagination };
       r.redeem = { data: (r.redeem && r.redeem.data) || [], pagination: r.redeem && r.redeem.pagination };
+      if (r.activity && Array.isArray(r.activity.data)) {
+        var feed = r.activity.data;
+        var page = r.activity.pagination;
+        if (page && !page.has_more && !page.next_cursor) {
+          S.summary.capital_flows = feed.filter(function (a) {
+            return a.type === "DEPOSIT" || a.type === "WITHDRAWAL";
+          }).map(function (a) {
+            return { t: Number(a.timestamp), amount: Number(a.usdc_size) * (a.type === "DEPOSIT" ? 1 : -1) };
+          });
+        } else if (feed.some(function (a) {
+          return (a.type === "DEPOSIT" || a.type === "WITHDRAWAL") && Number(a.timestamp) * 1000 > S.savedTime;
+        }) || (page && page.has_more && feed.every(function (a) { return Number(a.timestamp) * 1000 > S.savedTime; }))) {
+          S.summary.capital_flows = null;
+        }
+      }
       r.activity = { data: (r.activity && r.activity.data) || [] };
       if (r.closed) r.closed = { data: r.closed.data || [] };
       if (slow) L.closedAt = now;
@@ -914,7 +953,7 @@
     renderPnl();
     renderList();
 
-    get("/data/summary.json").then(function (s) { renderSavedReturn(s); renderSummary(s); renderPnl(); }).catch(function () {
+    get("/data/summary.json").then(function (s) { S.savedTime = Date.parse(s.updated); renderSavedReturn(s); renderSummary(s); renderPnl(); }).catch(function () {
       $("updated").textContent = "Data not available yet. The first update runs shortly after setup.";
     }).then(after);
     var done = 0;

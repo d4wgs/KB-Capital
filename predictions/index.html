@@ -21,7 +21,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="/style.css?v=15">
-  <link rel="stylesheet" href="/paper.css?v=2">
+  <link rel="stylesheet" href="/paper.css?v=3">
 </head>
 <body class="record">
   <main class="wrap">
@@ -77,6 +77,8 @@
           </div>
         </div>
         <div class="pl-chart" id="pl-chart" role="img" aria-label="Profit and loss chart"></div>
+        <div class="pace"><span>Target P&amp;L <strong id="pl-target">--</strong></span><span>Actual less target <strong id="pl-gap">--</strong></span></div>
+        <p class="meta">Dotted line: 1% daily, compounded from inception on capital as deposited or withdrawn. Each range shows target earnings over the displayed interval.</p>
         <p class="pl-foot" id="pl-foot"></p>
         <h2 class="exchange-title">Exchange summary</h2>
         <div class="stats3">
@@ -135,6 +137,6 @@
     <p>&copy; <span id="year">2026</span> KB Capital. A private portfolio of personal funds. Not accepting outside capital. Data comes from Polymarket's public APIs and is polled about every 30 seconds while this page is open. Saved snapshots are scheduled every 15 minutes. Figures are marked values, not guaranteed. Past results do not predict future results. Nothing here is investment advice, an offer to sell, or a solicitation of an offer to buy any security or interest in any fund. Not affiliated with Polymarket.</p>
   </footer>
 
-  <script src="/script.js?v=14" defer></script>
+  <script src="/script.js?v=15" defer></script>
 </body>
 </html>
