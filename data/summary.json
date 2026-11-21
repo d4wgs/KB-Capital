@@ -1,5 +1,5 @@
 {
- "updated": "2026-11-21T01:43:29Z",
+ "updated": "2026-11-21T08:51:14Z",
  "capital_flows": [
   {
    "t": 1794878383.0,
@@ -23,8 +23,8 @@
   }
  ],
  "wallet": "0x03e1859bcc5293ff3e2c4e9cb483dc76048d5f2d",
- "total_value": 291.032061,
- "positions_value": 42.7908,
+ "total_value": 295.683261,
+ "positions_value": 47.442,
  "cash": 248.241261,
  "trade_delay_hours": 0.0,
  "metrics": {
@@ -40,15 +40,15 @@
   "best_title": "Anthropic IPO closing market cap above $1.1T?",
   "worst_title": "Canadiens vs. Rangers",
   "realized_pnl": 31.3765,
-  "unrealized_pnl": -0.9303,
-  "total_pnl": 30.4462,
+  "unrealized_pnl": 3.7208,
+  "total_pnl": 35.0973,
   "open_count": 1,
   "open_cost": 43.721,
-  "largest_position_pct": 0.9999976630490667,
+  "largest_position_pct": 0.9999978921630622,
   "markets_traded": 5,
   "volume_usdc": 918.830686,
   "trade_count": 15,
   "net_deposits": 260.595367,
-  "pnl_vs_deposits": 30.43669399999999
+  "pnl_vs_deposits": 35.087894000000006
  }
 }
