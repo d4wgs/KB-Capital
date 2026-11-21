@@ -36,3 +36,17 @@
 .record .day.today { outline: 2px solid #111; outline-offset: 1px; box-shadow: none; }
 .record .cal-tip { background: white; color: #171717; border-color: #888; box-shadow: 0 3px 12px #0002; }
 .record .cal-tip .st { color: #171717; }
+
+:root, body.record { --green: #11643e; --red: #a02731; }
+.money, #track-nav, #track-capital, #s-cash, #s-volume, #s-positions, #s-best,
+.figs > div:first-child dd, .figs > div:last-child dd { color: var(--green); }
+.loss { color: var(--red); }
+.record .day.hit, .record .lg.hit { background: var(--green); border-color: var(--green); }
+.record .day.gain, .record .lg.gain { background: #e2f1e8; color: var(--green); border-color: #639578; }
+.record .day.miss, .record .lg.miss { background: #fbebec; color: var(--red); border-color: #ba7479; }
+.record .cal-tip .st.hit { color: var(--green); }
+.wallet-copy { display: inline-flex; align-items: center; gap: .45rem; max-width: 100%; text-align: left; padding: .35rem 0; color: var(--muted); font: .82rem/1.4 ui-monospace, monospace; }
+.wallet-copy span { overflow-wrap: anywhere; }
+.wallet-copy svg { flex: none; width: 1rem; height: 1rem; }
+.wallet-copy:disabled { visibility: hidden; }
+#copy-status { font-size: .8rem; }

@@ -129,7 +129,7 @@
     sum.textContent = "";
     var n = hit + miss;
     [[String(hit), "days hit 1%+"], [String(miss), "days under 1%"], [n ? Math.round(hit / n * 100) + "%" : "--", "hit rate this month"], [sUsd(total), "P&L this month"]]
-      .forEach(function (x) { sum.appendChild(el("div", {}, [el("b", { text: x[0] }), el("span", { text: x[1] })])); });
+      .forEach(function (x) { sum.appendChild(el("div", {}, [el("b", { text: x[0], class: x[1] === "P&L this month" ? (total < 0 ? "neg" : "pos") : "" }), el("span", { text: x[1] })])); });
 
     var a = ymd(first), b = ymd(last);
     $("prev").disabled = view.y * 12 + view.m <= a.y * 12 + a.m;

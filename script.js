@@ -116,6 +116,8 @@
     $("track-gain").textContent = signedUsd(gain);
     $("track-return").textContent = isNum(gain) && capital > 0
       ? (gain > 0 ? "+" : "") + (100 * gain / capital).toFixed(2) + "%" : "--";
+    $("track-gain").className = cls(gain);
+    $("track-return").className = "big " + cls(capital > 0 ? gain : null);
     $("track-time").textContent = utcStamp(s.updated);
   }
 
@@ -135,7 +137,7 @@
     $("s-volume").textContent = isNum(m.volume_usdc) ? usd(m.volume_usdc) : "--";
     $("s-cash").textContent = usd(s.cash);
     renderTotalPnl();
-    if (s.wallet) $("meta").textContent = "Polymarket portfolio · " + s.wallet.slice(0, 6) + "…" + s.wallet.slice(-4);
+    if (s.wallet) { $("meta").textContent = s.wallet; $("copy-addr").disabled = false; }
     $("updated").textContent = s.updated ? (s.live ? "Live data, updated " : "Saved data, updated ") + ago(s.updated) + " (" + dt(s.updated) + ")." : "";
   }
 
@@ -219,6 +221,7 @@
     var last = pts[pts.length - 1].v;
 
     $("pl-value").textContent = usd(last);
+    $("pl-value").className = "pl-value " + cls(last);
     var arrow = $("pl-arrow");
     arrow.textContent = last < 0 ? "▼" : "▲";
     arrow.className = "arrow" + (last < 0 ? " down" : "");
@@ -504,7 +507,7 @@
   function actRow(a) {
     var type = a.type === "TRADE" ? (a.side || "Trade") : (a.type || "--");
     type = type.charAt(0).toUpperCase() + type.slice(1).toLowerCase();
-    var tcls = a.side === "BUY" ? "pos" : a.side === "SELL" ? "neg" : "muted";
+    var tcls = "muted";
     var mkt = el("div", { class: "mkt" }, [
       thumb(a),
       el("div", { class: "mkt-text" }, [
@@ -516,7 +519,7 @@
         ])
       ])
     ]);
-    var amt = el("div", { class: "num r", text: a.usdc ? usd(a.usdc) : "--" });
+    var amt = el("div", { class: "num r money", text: a.usdc ? usd(a.usdc) : "--" });
     var time = el("div", { class: "num r muted c-time", text: a.time ? ago(a.time) : "--", title: dt(a.time) });
     return makeRow(a, "activity", [el("div", { class: "num " + tcls, text: type }), mkt, amt, time]);
   }
@@ -877,11 +880,16 @@
     $("pos-more").addEventListener("click", function () { S.shownPos += PAGE; renderPositions(); });
     $("act-more").addEventListener("click", function () { S.shownAct += PAGE; renderActivity(); });
 
+    var copyTimer;
     $("copy-addr").addEventListener("click", function () {
       var a = S.summary && S.summary.wallet;
-      if (!a || !navigator.clipboard) return;
-      var b = this;
-      navigator.clipboard.writeText(a).then(function () { b.title = "Copied!"; setTimeout(function () { b.title = "Copy wallet address"; }, 1500); }).catch(function () {});
+      var status = $("copy-status");
+      clearTimeout(copyTimer);
+      if (!navigator.clipboard) { status.textContent = "Copy unavailable"; return; }
+      navigator.clipboard.writeText(a).then(function () {
+        status.textContent = "Copied";
+        copyTimer = setTimeout(function () { status.textContent = ""; }, 1800);
+      }).catch(function () { status.textContent = "Copy unavailable"; });
     });
     $("share").addEventListener("click", function () {
       var url = location.href;
