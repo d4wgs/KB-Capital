@@ -53,3 +53,25 @@
 .target-line { fill: none; stroke: #505050; stroke-width: 2; stroke-dasharray: 1 5; stroke-linecap: round; }
 .pace { display: flex; flex-wrap: wrap; gap: .4rem 1.4rem; margin: .8rem 0 .35rem; font-size: .85rem; }
 #pl-target { color: var(--green); }
+
+.portfolio .who { padding-block: .35rem .8rem; }
+.portfolio .panel { padding: clamp(.85rem, 1.5vw, 1.15rem); }
+.portfolio #track-return { margin-top: .4rem; font-size: clamp(2rem, 3vw, 2.7rem); }
+.portfolio .profile .cap { margin-bottom: .55rem; }
+.portfolio .kv { gap: .4rem; padding-block: .65rem; }
+.portfolio .profile > .meta { padding-top: .55rem; }
+.portfolio .pl-foot { margin-bottom: 0; }
+.exchange-band dl {
+  display: grid; grid-template-columns: repeat(6, minmax(0, 1fr));
+  gap: .6rem 1rem; margin: .8rem 0 0; padding: .75rem 0;
+  border-block: 1px solid var(--border);
+}
+.exchange-band dt { font-size: .75rem; color: var(--muted); }
+.exchange-band dd { margin: .15rem 0 0; font-weight: 600; }
+.portfolio .lists { margin-top: 1rem; }
+@media (max-width: 800px) {
+  .exchange-band dl { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+}
+@media (max-width: 380px) {
+  .exchange-band dl { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}

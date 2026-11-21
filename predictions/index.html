@@ -21,9 +21,9 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="/style.css?v=15">
-  <link rel="stylesheet" href="/paper.css?v=3">
+  <link rel="stylesheet" href="/paper.css?v=4">
 </head>
-<body class="record">
+<body class="record portfolio">
   <main class="wrap">
     <nav class="tabs" aria-label="Portfolio sections">
       <a class="tab" href="/">About us</a>
@@ -57,7 +57,7 @@
           <div><dt>Saved snapshot (UTC)</dt><dd id="track-time">--</dd></div>
           <div><dt>Latest observed fill (UTC)</dt><dd id="track-fill">--</dd></div>
         </dl>
-        <p class="meta">Return equals total gain divided by net contributions. Open holdings use exchange marks at the saved valuation.</p>
+        <p class="meta">Return = total gain ÷ net contributions. Open holdings use exchange marks.</p>
       </div>
 
       <!-- P&L card -->
@@ -78,21 +78,19 @@
         </div>
         <div class="pl-chart" id="pl-chart" role="img" aria-label="Profit and loss chart"></div>
         <div class="pace"><span>Target P&amp;L <strong id="pl-target">--</strong></span><span>Actual less target <strong id="pl-gap">--</strong></span></div>
-        <p class="meta">Dotted line: 1% daily, compounded from inception on capital as deposited or withdrawn. Each range shows target earnings over the displayed interval.</p>
+        <p class="meta">Dotted target compounds at 1% daily and adjusts for deposits and withdrawals.</p>
         <p class="pl-foot" id="pl-foot"></p>
-        <h2 class="exchange-title">Exchange summary</h2>
-        <div class="stats3">
-          <div><p class="big" id="s-positions">--</p><p class="cap">Open holdings</p></div>
-          <div><p class="big" id="s-best">--</p><p class="cap">Largest closed gain</p></div>
-          <div><p class="big" id="s-markets">--</p><p class="cap">Markets traded</p></div>
-        </div>
-        <dl class="kv">
-          <div><dt>Exchange P&amp;L</dt><dd id="s-pnl">--</dd></div>
-          <div><dt>Trading volume</dt><dd id="s-volume">--</dd></div>
-          <div><dt>Cash</dt><dd id="s-cash">--</dd></div>
-        </dl>
-
       </div>
+    </section>
+    <section class="exchange-band" aria-label="Exchange summary">
+      <dl>
+        <div><dt>Open holdings</dt><dd id="s-positions">--</dd></div>
+        <div><dt>Cash</dt><dd id="s-cash">--</dd></div>
+        <div><dt>Exchange P&amp;L</dt><dd id="s-pnl">--</dd></div>
+        <div><dt>Trading volume</dt><dd id="s-volume">--</dd></div>
+        <div><dt>Largest closed gain</dt><dd id="s-best">--</dd></div>
+        <div><dt>Markets traded</dt><dd id="s-markets">--</dd></div>
+      </dl>
     </section>
 
     <!-- Positions / Activity -->
