@@ -115,3 +115,13 @@ main.wrap { padding-top: 0; }
   .fund-bar nav { gap: .65rem; }
   .fund-bar nav a { font-size: .78rem; }
 }
+
+.wallet-brand { display: flex; align-items: center; gap: clamp(.4rem, 1vw, .85rem); min-width: 0; }
+.wallet-brand .header-wallet { min-width: 0; position: relative; }
+.wallet-brand .wallet-copy { padding-block: 0; vertical-align: middle; }
+.wallet-brand .wallet-copy span { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.wallet-brand #copy-status { position: absolute; top: 100%; left: 0; background: white; }
+.portfolio .fund-bar nav { flex: none; }
+@media (max-width: 760px) {
+  .wallet-brand .header-wallet { max-width: clamp(2.5rem, 11vw, 6rem); }
+}
