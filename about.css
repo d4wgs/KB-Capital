@@ -152,3 +152,29 @@ h1 { font-size: clamp(1.625rem, 1rem + 2vw, 2.375rem); font-weight: 600; line-he
 }
 
 @media (prefers-reduced-motion: reduce) { * { transition: none !important; animation: none !important; } }
+
+/* Portfolio report typography and spacing. */
+:root {
+  --bg: #1d2b39;
+  --text: #fff;
+  --border: #40505d;
+  --body: #c4cdd4;
+  --text-2: #a8b5bf;
+  --muted: #a8b5bf;
+  --blue: #a5c3c6;
+  --blue-hover: #c4dddd;
+}
+body { font-family: Inter, system-ui, sans-serif; }
+.topnav { border-color: var(--border); }
+.topnav a { color: var(--muted); }
+.fund-heading { padding-block: 1rem 1.35rem; }
+.fund-heading h1, .hero h2, .sec h2 {
+  font-family: Georgia, "Times New Roman", serif;
+  font-weight: 400;
+}
+.fund-heading h1 { font-size: clamp(2rem, 4vw, 3rem); line-height: 1.1; letter-spacing: normal; }
+.fund-heading p { color: var(--muted); font-size: .84rem; margin-top: .4rem; }
+.hero { padding-block: 1.5rem 2rem; }
+.hero h2 { font-size: clamp(1.4rem, 2vw, 2rem); line-height: 1.25; }
+.sec h2 { font-size: 1.38rem; }
+.sec { padding-block: clamp(2rem, 5vw, 3.5rem); }

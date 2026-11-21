@@ -80,3 +80,13 @@
   .cal-dow span { font-size: .65rem; }
   .day .cal-tip { width: 11.5rem; }
 }
+
+.record .cal-card { overflow: visible; }
+.record .cal-nav button, .record .day { border-radius: .3rem; }
+.record .cal-sum { border-block: 1px solid var(--border); padding-block: .85rem; }
+.record .cal-grid, .record .cal-dow { grid-template-columns: repeat(7, minmax(0, 1fr)); }
+.record .cal-grid { grid-auto-rows: clamp(2.8rem, 6vw, 4.6rem); }
+.record .day { aspect-ratio: auto; }
+.record .day .n { font-size: .8rem; }
+.record .day .p { font-size: clamp(.57rem, 1.8vw, .84rem); }
+.record .cal-legend { border-top: 1px solid var(--border); padding-top: .85rem; }

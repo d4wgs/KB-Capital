@@ -14,10 +14,10 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="/style.css?v=14">
-  <link rel="stylesheet" href="/calendar.css?v=7">
+  <link rel="stylesheet" href="/style.css?v=15">
+  <link rel="stylesheet" href="/calendar.css?v=8">
 </head>
-<body class="fit">
+<body class="record">
   <main class="wrap">
     <nav class="tabs" aria-label="Portfolio sections">
       <a class="tab" href="/">About us</a>
@@ -25,10 +25,11 @@
       <a class="tab on" href="/calendar/" aria-current="page">Calendar</a>
     </nav>
 
-    <section class="panel cal-card">
+    <header class="who"><div class="who-text"><h1>KB Capital</h1><p class="meta">Daily performance calendar</p></div></header>
+    <section class="panel cal-card" aria-labelledby="cal-title">
       <div class="cal-head">
         <div>
-          <h1 id="cal-title">Calendar</h1>
+          <h2 id="cal-title">Calendar</h2>
           <p class="cal-sub" id="cal-sub">Loading…</p>
         </div>
         <div class="cal-nav">
