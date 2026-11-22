@@ -4,6 +4,7 @@ const byId = id => document.getElementById(id);
 const money = new Intl.NumberFormat("en-US", {style:"currency", currency:"USD"});
 const dollars = n => money.format(n);
 const cents = n => (100 * n).toLocaleString("en-US", {maximumFractionDigits:3}) + "¢";
+const signedDollars = n => n == null ? "—" : (Number(n) > 0 ? "+" : "") + dollars(n);
 const percent = n => (100 * n).toFixed(1) + "%";
 let checked;
 
@@ -107,8 +108,8 @@ function renderHoldings(container, rows, closed) {
     item.dataset.token = p.token_id;
     item.open = expanded.has(p.token_id);
     const summary = document.createElement("summary");
-    const pnl = Number(closed ? p.realized_pnl : p.unrealized_pnl);
-    const signed = (pnl > 0 ? "+" : "") + dollars(pnl);
+    const pnl = Number(p.realized_pnl);
+    const signed = signedDollars(p.realized_pnl);
     const pnlClass = pnl > 0 ? "gain" : pnl < 0 ? "loss" : "";
     const amount = node("b", closed ? signed : dollars(p.current_value));
     if (closed) amount.className = pnlClass;
@@ -118,16 +119,18 @@ function renderHoldings(container, rows, closed) {
     fields.className = "holding-fields";
     const shares = Number(closed ? p.total_size : p.current_size).toLocaleString("en-US",{maximumFractionDigits:6});
     const metrics = [
-      [closed ? "Total shares" : "Quantity",shares + " shares"],
+      [closed ? "Total shares" : "Shares held",shares],
+      ...(!closed ? [["Total shares bought",Number(p.total_size).toLocaleString("en-US",{maximumFractionDigits:6})]] : []),
       ["Average entry",cents(p.avg_price)],
       ...(closed ? [["Last activity", new Date(p.last_event_at * 1000).toLocaleString()]] :
         [["Current mark",cents(p.current_price)],["Marked value",dollars(p.current_value)]]),
-      [closed ? "Realized P&L" : "Unrealized P&L",signed]
+      ["Realized P&L",signed],
+      ...(!closed ? [["Unrealized P&L",signedDollars(p.unrealized_pnl)],["Total P&L",signedDollars(p.total_pnl)]] : [])
     ];
     for (const [name,value] of metrics) {
       const field = document.createElement("div");
       const number = node("dd",value);
-      if (name.endsWith("P&L")) number.className = pnlClass;
+      if (name.endsWith("P&L")) number.className = value.startsWith("+") ? "gain" : value.startsWith("-") ? "loss" : "";
       field.append(node("dt",name),number);
       fields.append(field);
     }
