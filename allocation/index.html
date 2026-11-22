@@ -1,0 +1,52 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>KB Capital | Allocation</title>
+  <meta name="description" content="KB Capital wallet allocation and position sizing.">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self'; style-src 'self' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data:; connect-src 'self' https://data-api.polymarket.com https://polygon.drpc.org https://1rpc.io https://polygon-bor-rpc.publicnode.com; base-uri 'none'; form-action 'none'">
+  <meta name="referrer" content="no-referrer">
+  <meta name="color-scheme" content="light">
+  <meta name="theme-color" content="#ffffff">
+  <link rel="canonical" href="https://kbcap.fund/allocation/">
+  <link rel="icon" type="image/png" href="/favicon.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/style.css?v=15">
+  <link rel="stylesheet" href="/allocation/style.css">
+  <link rel="stylesheet" href="/paper.css?v=6">
+</head>
+<body class="record">
+  <main class="wrap">
+    <header class="fund-bar">
+      <a class="fund-name" href="/">KB Capital</a>
+      <nav aria-label="Portfolio sections">
+        <a href="/">About us</a>
+        <a href="/predictions/">Track record</a>
+        <a href="/allocation/" aria-current="page">Allocation</a>
+        <a href="/calendar/">Calendar</a>
+      </nav>
+    </header>
+    <div class="section-heading"><h1>Allocation</h1></div>
+    <p id="status" role="status">Reading wallet balances…</p>
+    <div class="allocation-grid">
+      <section class="panel"><h2>Wallet allocation</h2>
+        <div id="ring" aria-hidden="true"><div><small>Marked NAV</small><strong id="nav">—</strong></div></div>
+        <dl id="legend" class="kv"></dl>
+      </section>
+      <section class="panel"><h2>Position sizing</h2>
+        <label for="stake">Proposed spend ($)</label>
+        <input id="stake" type="number" min="0" step="0.01" value="100" disabled>
+        <p id="scenario" role="status"></p>
+        <progress id="exposure" max="100" value="0" aria-label="Projected holdings as a percentage of NAV"></progress>
+        <p class="meta">Assumes the position is initially worth the amount spent. Excludes fees and slippage.</p>
+      </section>
+    </div>
+    <section class="panel"><h2>Holdings</h2><div id="holdings"></div></section>
+  </main>
+  <script src="/wallet-api.js" defer></script>
+  <script src="/allocation/view.js" defer></script>
+</body>
+</html>

@@ -1,0 +1,11 @@
+.allocation-grid { display:grid; grid-template-columns:1.2fr 1fr; gap:2rem; margin:2rem 0; }
+#ring { width:min(100%, 17rem); aspect-ratio:1; border-radius:50%; background:#ddd; display:grid; place-items:center; margin:2rem auto; }
+#ring div { background:white; border-radius:50%; width:72%; height:72%; display:grid; align-content:center; justify-items:center; }
+#ring strong { font:2rem Georgia,serif; }
+#legend dt { border-left:5px solid; padding-left:.6rem; }
+#stake { display:block; margin:.65rem 0; padding:.5rem; width:9rem; font:inherit; }
+#exposure { width:100%; accent-color:#387868; }
+#holdings article { border-top:1px solid #ccc; padding:1rem 0; }
+#holdings h3 { margin:.25rem 0; }
+#holdings p { margin:.35rem 0; }
+@media(max-width:650px){ .allocation-grid { grid-template-columns:1fr; gap:1rem; } }
