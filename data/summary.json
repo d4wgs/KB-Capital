@@ -1,5 +1,43 @@
 {
- "updated": "2026-11-22T17:03:33Z",
+ "updated": "2026-11-22T22:24:58Z",
+ "periods": [
+  {
+   "t": 1794884911.0,
+   "end_t": 1795102126.0,
+   "flow": 310.595367,
+   "net_deposits": 310.595367,
+   "pnl_start": 1.965,
+   "start_value": 312.560367,
+   "end_pnl": 8.980819,
+   "end_value": 319.576186,
+   "gain": 7.015819,
+   "return": 0.022446284752410728
+  },
+  {
+   "t": 1795102126.0,
+   "end_t": 1795381654.0,
+   "flow": -50.0,
+   "net_deposits": 260.595367,
+   "pnl_start": 8.980819,
+   "start_value": 269.576186,
+   "end_pnl": 36.375638,
+   "end_value": 296.971005,
+   "gain": 27.394819,
+   "return": 0.10162180646030804
+  },
+  {
+   "t": 1795381654.0,
+   "end_t": null,
+   "flow": 421.739129,
+   "net_deposits": 682.334496,
+   "pnl_start": 36.375638,
+   "start_value": 718.710134,
+   "end_pnl": 36.375638,
+   "end_value": 718.70039,
+   "gain": 0.0,
+   "return": 0.0
+  }
+ ],
  "capital_flows": [
   {
    "t": 1794878383.0,
@@ -20,12 +58,20 @@
   {
    "t": 1795102126.0,
    "amount": -50.0
+  },
+  {
+   "t": 1795380805.0,
+   "amount": 4.9311
+  },
+  {
+   "t": 1795381654.0,
+   "amount": 416.808029
   }
  ],
  "wallet": "0x03e1859bcc5293ff3e2c4e9cb483dc76048d5f2d",
- "total_value": 296.961261,
+ "total_value": 718.70039,
  "positions_value": 37.7108,
- "cash": 259.250461,
+ "cash": 680.98959,
  "trade_delay_hours": 0.0,
  "metrics": {
   "closed_count": 4,
@@ -48,7 +94,8 @@
   "markets_traded": 5,
   "volume_usdc": 929.839886,
   "trade_count": 16,
-  "net_deposits": 260.595367,
-  "pnl_vs_deposits": 36.36589399999997
+  "net_deposits": 682.334496,
+  "pnl_vs_deposits": 36.365894000000026,
+  "time_weighted_return": 0.1263491232175813
  }
 }
