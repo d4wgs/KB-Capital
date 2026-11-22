@@ -98,6 +98,58 @@ function drawAllocation(slices, nav) {
   buttons.find(b => b.dataset.slice === focusId)?.focus({preventScroll:true});
 }
 
+function renderHoldings(container, rows, closed) {
+  const expanded = new Set(Array.from(container.querySelectorAll("details[open]"), el => el.dataset.token));
+  const focus = container.contains(document.activeElement) ? document.activeElement.closest("details")?.dataset.token : null;
+  const cards = rows.map(p => {
+    const item = document.createElement("details");
+    item.className = "holding";
+    item.dataset.token = p.token_id;
+    item.open = expanded.has(p.token_id);
+    const summary = document.createElement("summary");
+    const pnl = Number(closed ? p.realized_pnl : p.unrealized_pnl);
+    const signed = (pnl > 0 ? "+" : "") + dollars(pnl);
+    const pnlClass = pnl > 0 ? "gain" : pnl < 0 ? "loss" : "";
+    const amount = node("b", closed ? signed : dollars(p.current_value));
+    if (closed) amount.className = pnlClass;
+    summary.append(node("strong",p.title),node("small",p.outcome + " · " +
+      (closed ? "Realized P&L" : p.redeemable ? "Redeemable" : "Open")),amount);
+    const fields = document.createElement("dl");
+    fields.className = "holding-fields";
+    const shares = Number(closed ? p.total_size : p.current_size).toLocaleString("en-US",{maximumFractionDigits:6});
+    const metrics = [
+      [closed ? "Total shares" : "Quantity",shares + " shares"],
+      ["Average entry",cents(p.avg_price)],
+      ...(closed ? [["Last activity", new Date(p.last_event_at * 1000).toLocaleString()]] :
+        [["Current mark",cents(p.current_price)],["Marked value",dollars(p.current_value)]]),
+      [closed ? "Realized P&L" : "Unrealized P&L",signed]
+    ];
+    for (const [name,value] of metrics) {
+      const field = document.createElement("div");
+      const number = node("dd",value);
+      if (name.endsWith("P&L")) number.className = pnlClass;
+      field.append(node("dt",name),number);
+      fields.append(field);
+    }
+    item.append(summary,fields);
+    return item;
+  });
+  container.replaceChildren(...(cards.length ? cards : [node("p",closed ? "No closed holdings." : "No open or redeemable holdings.")]));
+  if (focus) cards.find(c => c.dataset.token === focus)?.firstElementChild.focus({preventScroll:true});
+}
+
+async function refreshHistory() {
+  try {
+    const rows = await positions("CLOSED");
+    rows.sort((a,b) => b.last_event_at-a.last_event_at);
+    renderHoldings(byId("history"),rows,true);
+    byId("history-status").textContent = "";
+  } catch {
+    byId("history-status").textContent = "Couldn’t refresh closed holdings. Retrying in one minute.";
+  } finally {
+    setTimeout(refreshHistory,60000);
+  }
+}
 async function refresh() {
   try {
     const [cash, open, redeemable] = await Promise.all([walletApi.cashOnChain(wallet), positions("OPEN"), positions("REDEEMABLE")]);
@@ -105,37 +157,12 @@ async function refresh() {
     if (!Number.isFinite(cash) || rows.some(p => p.current_value == null || !Number.isFinite(Number(p.current_value)))) throw Error("Missing balance");
     rows.sort((a,b) => b.current_value-a.current_value);
     const slices = [{id:"cash", label:"Cash (pUSD)", amount:cash, color:"#185646"}];
-    const details = [];
     rows.forEach((p,i) => {
-      const label = p.title + " · " + p.outcome;
-      slices.push({id:p.token_id, label, amount:Number(p.current_value), color:palette[i % palette.length]});
-      const item = document.createElement("article");
-      const status = node("span", p.status === "OPEN" ? "Open" : p.status);
-      status.className = "holding-status";
-      const fields = document.createElement("dl");
-      fields.className = "holding-fields";
-      const pnl = Number(p.unrealized_pnl);
-      const metrics = [
-        ["Outcome", p.outcome],
-        ["Quantity", Number(p.current_size).toLocaleString("en-US",{maximumFractionDigits:6}) + " shares"],
-        ["Average entry", cents(p.avg_price)],
-        ["Current mark", cents(p.current_price)],
-        ["Marked value", dollars(p.current_value)],
-        ["Unrealized P&L", (pnl > 0 ? "+" : "") + dollars(pnl)]
-      ];
-      for (const [name,value] of metrics) {
-        const field = document.createElement("div");
-        const number = node("dd",value);
-        if (name === "Unrealized P&L" && pnl) number.className = pnl > 0 ? "gain" : "loss";
-        field.append(node("dt",name),number);
-        fields.append(field);
-      }
-      item.append(status,node("h3",p.title),fields);
-      details.push(item);
+      slices.push({id:p.token_id,label:p.title + " · " + p.outcome,amount:Number(p.current_value),color:palette[i % palette.length]});
     });
     const nav = slices.reduce((sum,s) => sum+s.amount,0);
     drawAllocation(slices, nav);
-    byId("holdings").replaceChildren(...(details.length ? details : [node("p","No open or redeemable positions.")]));
+    renderHoldings(byId("holdings"), rows, false);
     checked = new Date().toLocaleString();
     byId("status").textContent = "Polymarket positions and Polygon cash · Updated " + checked;
   } catch {
@@ -185,3 +212,4 @@ async function refreshFills() {
 filter.addEventListener("change",renderFills);
 refreshFills();
 refresh();
+refreshHistory();

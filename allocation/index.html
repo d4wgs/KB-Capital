@@ -15,7 +15,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="/style.css?v=15">
-  <link rel="stylesheet" href="/allocation/style.css?v=4">
+  <link rel="stylesheet" href="/allocation/style.css?v=5">
   <link rel="stylesheet" href="/paper.css?v=6">
 </head>
 <body class="record">
@@ -36,7 +36,8 @@
         <div id="ring"><canvas id="donut" aria-hidden="true"></canvas><div class="ring-center"><small id="ring-label">Marked NAV</small><strong id="nav">—</strong></div></div>
         <p class="chart-help">Hover or select a holding to inspect its share.</p><div id="legend" aria-label="Wallet allocation breakdown"></div>
       </section>
-      <section class="panel"><h2>Holdings</h2><div id="holdings"></div></section>
+      <section class="panel"><h2>Current holdings</h2><div id="holdings"></div>
+        <h2 class="history-heading">Closed holdings</h2><p id="history-status" role="status">Loading history…</p><div id="history"></div></section>
     </div>
     <section class="panel"><h2>Open orders</h2>
       <p>Your resting orders are available in your signed-in Polymarket portfolio.</p>
@@ -52,6 +53,6 @@
   <script src="/wallet-api.js" defer></script>
   <script src="/allocation/vendor/chart.umd.js" defer></script>
   <script src="/allocation/vendor/datalabels.js" defer></script>
-  <script src="/allocation/view.js?v=4" defer></script>
+  <script src="/allocation/view.js?v=5" defer></script>
 </body>
 </html>
