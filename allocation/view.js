@@ -110,7 +110,27 @@ async function refresh() {
       const label = p.title + " · " + p.outcome;
       slices.push({id:p.token_id, label, amount:Number(p.current_value), color:palette[i % palette.length]});
       const item = document.createElement("article");
-      item.append(node("h3",label), node("p",p.status + " · " + p.current_size + " shares · Entry " + cents(p.avg_price) + " · Mark " + cents(p.current_price)), node("p","Marked value " + dollars(p.current_value) + " · Unrealized P&L " + dollars(p.unrealized_pnl)));
+      const status = node("span", p.status === "OPEN" ? "Open" : p.status);
+      status.className = "holding-status";
+      const fields = document.createElement("dl");
+      fields.className = "holding-fields";
+      const pnl = Number(p.unrealized_pnl);
+      const metrics = [
+        ["Outcome", p.outcome],
+        ["Quantity", Number(p.current_size).toLocaleString("en-US",{maximumFractionDigits:6}) + " shares"],
+        ["Average entry", cents(p.avg_price)],
+        ["Current mark", cents(p.current_price)],
+        ["Marked value", dollars(p.current_value)],
+        ["Unrealized P&L", (pnl > 0 ? "+" : "") + dollars(pnl)]
+      ];
+      for (const [name,value] of metrics) {
+        const field = document.createElement("div");
+        const number = node("dd",value);
+        if (name === "Unrealized P&L" && pnl) number.className = pnl > 0 ? "gain" : "loss";
+        field.append(node("dt",name),number);
+        fields.append(field);
+      }
+      item.append(status,node("h3",p.title),fields);
       details.push(item);
     });
     const nav = slices.reduce((sum,s) => sum+s.amount,0);

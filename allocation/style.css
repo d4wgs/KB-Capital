@@ -26,3 +26,11 @@
 #fills article { border-top:1px solid #ddd; padding:.75rem 0; }
 #fills p { margin:.25rem 0; }
 #fills small { color:#555; }
+#holdings .holding-status { display:inline-block; border:1px solid #bbccc5; border-radius:1rem; padding:.14rem .58rem; background:#edf4ef; color:#284f44; font-size:.78rem; font-weight:600; }
+#holdings h3 { margin:.6rem 0 1rem; }
+.holding-fields { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:0 1rem; margin:0; }
+.holding-fields div { padding:.65rem 0; border-top:1px solid #e1e3df; }
+.holding-fields dt { font-size:.8rem; color:#535b57; }
+.holding-fields dd { margin:.18rem 0 0; font-weight:600; font-variant-numeric:tabular-nums; overflow-wrap:anywhere; }
+.holding-fields .gain { color:#176043; }
+.holding-fields .loss { color:#9a3235; }
