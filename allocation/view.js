@@ -5,7 +5,7 @@ const money = new Intl.NumberFormat("en-US", {style:"currency", currency:"USD"})
 const dollars = n => money.format(n);
 const cents = n => (100 * n).toLocaleString("en-US", {maximumFractionDigits:3}) + "¢";
 const percent = n => (100 * n).toFixed(1) + "%";
-let balances, checked;
+let checked;
 
 async function positions(status) {
   const rows = [];
@@ -28,20 +28,6 @@ function node(tag, text) {
   const element = document.createElement(tag);
   element.textContent = text;
   return element;
-}
-
-function scenario() {
-  const stake = byId("stake").valueAsNumber;
-  const {cash, nav} = balances;
-  const valid = Number.isFinite(stake) && stake >= 0 && stake <= cash && nav > 0;
-  byId("exposure").hidden = !valid;
-  if (!valid) {
-    byId("scenario").textContent = nav ? "Enter an amount between $0 and " + dollars(cash) + "." : "Wallet balance is zero.";
-    return;
-  }
-  const deployed = (nav - cash + stake) / nav;
-  byId("scenario").textContent = percent(stake/nav) + " of NAV in this trade · " + dollars(cash-stake) + " cash remaining · " + percent(deployed) + " total holdings after purchase.";
-  byId("exposure").value = deployed * 100;
 }
 
 const palette = ["#2355a1", "#a54317", "#745296", "#006a81", "#9a384c", "#65591e"];
@@ -130,9 +116,6 @@ async function refresh() {
     const nav = slices.reduce((sum,s) => sum+s.amount,0);
     drawAllocation(slices, nav);
     byId("holdings").replaceChildren(...(details.length ? details : [node("p","No open or redeemable positions.")]));
-    balances = {cash,nav};
-    byId("stake").disabled = false;
-    scenario();
     checked = new Date().toLocaleString();
     byId("status").textContent = "Polymarket positions and Polygon cash · Updated " + checked;
   } catch {
@@ -141,5 +124,44 @@ async function refresh() {
     setTimeout(refresh,60000);
   }
 }
-byId("stake").addEventListener("input",scenario);
+let fills = [];
+let fillsChecked;
+const filter = byId("fill-market");
+function renderFills() {
+  const visible = fills.filter(f => !filter.value || f.condition_id === filter.value);
+  const cards = visible.map(f => {
+    const card = document.createElement("article");
+    const time = new Date(f.timestamp * (f.timestamp < 1e12 ? 1000 : 1));
+    const title = node("strong", f.title);
+    const side = f.side === "BUY" ? "Bought" : "Sold";
+    const summary = node("p", side + " " + Number(f.size).toLocaleString(undefined,{maximumFractionDigits:4}) +
+      " " + f.outcome + " at " + cents(f.price) + " · " + dollars(f.usdc_size));
+    card.append(title,summary,node("small",time.toLocaleString()));
+    return card;
+  });
+  byId("fills").replaceChildren(...(cards.length ? cards : [node("p","No recent fills for this selection.")]));
+}
+
+async function refreshFills() {
+  try {
+    const page = await walletApi.pollApi("/activity",{user:wallet,type:"TRADE",limit:100});
+    if (!Array.isArray(page.data)) throw Error("Missing activity");
+    fills = page.data.filter(f => f.type === "TRADE" && ["BUY","SELL"].includes(f.side))
+      .sort((a,b) => b.timestamp-a.timestamp);
+    const markets = new Map(fills.map(f => [f.condition_id,f.title]));
+    const previous = filter.value;
+    filter.replaceChildren(new Option("All traded markets",""),
+      ...Array.from(markets, ([id,title]) => new Option(title,id)));
+    if (markets.has(previous)) filter.value = previous;
+    renderFills();
+    fillsChecked = new Date().toLocaleString();
+    byId("fills-status").textContent = "Latest " + fills.length + " wallet fills · Updated " + fillsChecked;
+  } catch {
+    byId("fills-status").textContent = fillsChecked ? "Refresh unavailable · Last updated " + fillsChecked : "Wallet fills unavailable. Retrying in one minute.";
+  } finally {
+    setTimeout(refreshFills,60000);
+  }
+}
+filter.addEventListener("change",renderFills);
+refreshFills();
 refresh();

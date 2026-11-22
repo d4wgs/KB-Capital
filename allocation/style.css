@@ -3,8 +3,6 @@
 #ring div { background:white; border-radius:50%; width:72%; height:72%; display:grid; align-content:center; justify-items:center; }
 #ring strong { font:2rem Georgia,serif; }
 #legend dt { border-left:5px solid; padding-left:.6rem; }
-#stake { display:block; margin:.65rem 0; padding:.5rem; width:9rem; font:inherit; }
-#exposure { width:100%; accent-color:#387868; }
 #holdings article { border-top:1px solid #ccc; padding:1rem 0; }
 #holdings h3 { margin:.25rem 0; }
 #holdings p { margin:.35rem 0; }
@@ -22,5 +20,9 @@
 #legend button small { grid-column:3; text-align:right; color:#555; }
 .slice-mark { grid-row:span 2; display:grid; place-items:center; border-radius:50%; width:1.7rem; height:1.7rem; color:white; font-weight:700; font-size:.8rem; }
 #legend button strong { font-variant-numeric:tabular-nums; }
-#stake:focus-visible { outline:2px solid #245a92; outline-offset:2px; }
 @media(prefers-reduced-motion:reduce){ #legend button { transition:none; } #legend button.highlight { transform:none; } }
+.fills-panel { margin-top:1.5rem; }
+#fill-market { display:block; max-width:100%; margin:.5rem 0; padding:.5rem; font:inherit; }
+#fills article { border-top:1px solid #ddd; padding:.75rem 0; }
+#fills p { margin:.25rem 0; }
+#fills small { color:#555; }
