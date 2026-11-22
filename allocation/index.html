@@ -15,7 +15,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="/style.css?v=15">
-  <link rel="stylesheet" href="/allocation/style.css">
+  <link rel="stylesheet" href="/allocation/style.css?v=2">
   <link rel="stylesheet" href="/paper.css?v=6">
 </head>
 <body class="record">
@@ -33,8 +33,8 @@
     <p id="status" role="status">Reading wallet balances…</p>
     <div class="allocation-grid">
       <section class="panel"><h2>Wallet allocation</h2>
-        <div id="ring" aria-hidden="true"><div><small>Marked NAV</small><strong id="nav">—</strong></div></div>
-        <dl id="legend" class="kv"></dl>
+        <div id="ring"><canvas id="donut" aria-hidden="true"></canvas><div class="ring-center"><small id="ring-label">Marked NAV</small><strong id="nav">—</strong></div></div>
+        <p class="chart-help">Hover or select a holding to inspect its share.</p><div id="legend" aria-label="Wallet allocation breakdown"></div>
       </section>
       <section class="panel"><h2>Position sizing</h2>
         <label for="stake">Proposed spend ($)</label>
@@ -47,6 +47,8 @@
     <section class="panel"><h2>Holdings</h2><div id="holdings"></div></section>
   </main>
   <script src="/wallet-api.js" defer></script>
-  <script src="/allocation/view.js" defer></script>
+  <script src="/allocation/vendor/chart.umd.js" defer></script>
+  <script src="/allocation/vendor/datalabels.js" defer></script>
+  <script src="/allocation/view.js?v=2" defer></script>
 </body>
 </html>

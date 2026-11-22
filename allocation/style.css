@@ -9,3 +9,18 @@
 #holdings h3 { margin:.25rem 0; }
 #holdings p { margin:.35rem 0; }
 @media(max-width:650px){ .allocation-grid { grid-template-columns:1fr; gap:1rem; } }
+#ring { position:relative; display:block; background:#f4f5f3; }
+#ring canvas { position:relative; z-index:1; }
+#ring .ring-center { position:absolute; inset:18%; width:auto; height:auto; text-align:center; pointer-events:none; }
+#ring-label { max-width:90%; display:-webkit-box; -webkit-line-clamp:3; -webkit-box-orient:vertical; overflow:hidden; }
+.chart-help,#status { color:#555; font-size:.86rem; }
+#legend { display:grid; }
+#legend button { display:grid; grid-template-columns:1.75rem minmax(0,1fr) auto; align-items:center; column-gap:.7rem; text-align:left; background:white; color:#222; border:0; border-top:1px solid #deded9; padding:.7rem; font:inherit; cursor:pointer; transition:background .16s,transform .16s; }
+#legend button.highlight,#legend button[aria-pressed=true] { background:#ecf2ee; }
+#legend button.highlight { transform:translateX(2px); }
+#legend button:focus-visible { outline:2px solid #245a92; outline-offset:-2px; }
+#legend button small { grid-column:3; text-align:right; color:#555; }
+.slice-mark { grid-row:span 2; display:grid; place-items:center; border-radius:50%; width:1.7rem; height:1.7rem; color:white; font-weight:700; font-size:.8rem; }
+#legend button strong { font-variant-numeric:tabular-nums; }
+#stake:focus-visible { outline:2px solid #245a92; outline-offset:2px; }
+@media(prefers-reduced-motion:reduce){ #legend button { transition:none; } #legend button.highlight { transform:none; } }
