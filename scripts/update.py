@@ -252,9 +252,10 @@ def minute_pnl(now_ts, activity_raw, positions):
     return out
 
 
-def build_pnl_ranges(now_ts, activity_raw, positions):
+def build_pnl_ranges(now_ts, activity_raw, positions, hourly_out=None):
     """Profit/loss series per chart range:
-       1H = every minute (rebuilt), 12H and 1D = every hour, 1W / 1M / ALL = every day."""
+       1H = every minute (rebuilt), 12H and 1D = every hour, 1W / 1M / ALL = every day.
+       hourly_out (optional list) receives the full hourly [(t, pnl)] history for deposit-period math."""
     res = {}
 
     def to_rows(pts):
@@ -271,6 +272,8 @@ def build_pnl_ranges(now_ts, activity_raw, positions):
         hourly = pnl_points("max", "1h")
         if len(hourly) > 2500:  # very old account: let Polymarket aggregate to days
             hourly = pnl_points("max", "1d")
+        if hourly_out is not None:
+            hourly_out.extend(hourly)
         if hourly:
             by_day = {}
             for t, v in hourly:
@@ -295,6 +298,57 @@ def build_pnl_ranges(now_ts, activity_raw, positions):
     except Exception as e:
         print(f"  minute P&L unavailable: {e}", file=sys.stderr)
     return res
+
+PERIOD_CLUSTER_S = 6 * 3600  # transfers closer together than this count as one deposit event
+
+
+def pnl_at(series, t):
+    """Economic P&L at time t: last hourly reading at or before t (0 before the account has any history)."""
+    val = 0.0
+    for ts, v in series:
+        if ts > t:
+            break
+        val = v
+    return val
+
+
+def build_periods(flows, hourly, end_pnl, total_value):
+    """Split the fund's life into deposit periods, so return is measured on the capital actually at work.
+
+    A period starts at each deposit/withdrawal event (transfers within PERIOD_CLUSTER_S are merged) and runs
+    until the next one, or now. Because the account's P&L is independent of transfers, a period's return is
+        (P&L at end - P&L at start) / (portfolio value right after the transfer = cumulative net deposits + P&L at start).
+    Chaining the periods gives a time-weighted return that a big later deposit cannot dilute.
+    """
+    events = []
+    for t, amt in sorted(flows):
+        if events and t - events[-1]["t"] <= PERIOD_CLUSTER_S:
+            events[-1]["t"] = t
+            events[-1]["amount"] += amt
+        else:
+            events.append({"t": t, "amount": amt})
+    if not events:
+        return []
+    periods, cum = [], 0.0
+    for i, ev in enumerate(events):
+        cum += ev["amount"]
+        pnl0 = pnl_at(hourly, ev["t"])
+        nxt = events[i + 1] if i + 1 < len(events) else None
+        pnl1 = pnl_at(hourly, nxt["t"]) if nxt else (end_pnl if end_pnl is not None else pnl_at(hourly, float("inf")))
+        start_value = cum + pnl0
+        periods.append({
+            "t": ev["t"],
+            "end_t": nxt["t"] if nxt else None,
+            "flow": round(ev["amount"], 6),
+            "net_deposits": round(cum, 6),
+            "pnl_start": round(pnl0, 6),
+            "start_value": round(start_value, 6),
+            "end_pnl": round(pnl1, 6),
+            "end_value": round(cum + pnl1, 6) if nxt else (round(total_value, 6) if total_value is not None else None),
+            "gain": round(pnl1 - pnl0, 6),
+            "return": ((pnl1 - pnl0) / start_value) if start_value > 0.5 else None,
+        })
+    return periods
 
 
 def load_json(path, default):
@@ -371,7 +425,8 @@ def main():
         stats = api("/user-stats").get("data")
     except Exception as e:
         print(f"  user-stats unavailable: {e}", file=sys.stderr)
-    pnl_ranges = build_pnl_ranges(now.timestamp(), activity_raw, positions)
+    hourly_pnl = []
+    pnl_ranges = build_pnl_ranges(now.timestamp(), activity_raw, positions, hourly_pnl)
     if TRADE_DELAY_HOURS > 0:  # a P&L curve also reveals when trades happened
         pnl_ranges = {k: [pt for pt in v if pt["t"] <= cutoff] for k, v in pnl_ranges.items()}
     pnl_series = pnl_ranges.get("all", [])
@@ -417,8 +472,22 @@ def main():
         "pnl_vs_deposits": (total_value - net_deposits) if (total_value is not None and net_deposits is not None) else None,
     }
 
+    # Deposit-period returns (only when the full transfer history was read, like net_deposits).
+    periods = None
+    if net_deposits is not None and hourly_pnl:
+        ap = stats.get("all_time_pnl") if isinstance(stats, dict) else None
+        end_pnl = num(ap.get("economic_pnl"), None) if isinstance(ap, dict) else None
+        periods = build_periods([(ts_s(a["timestamp"]), num(a.get("usdc_size") or a.get("size")) * (1 if a["type"] == "DEPOSIT" else -1)) for a in transfers],
+                                hourly_pnl, end_pnl, total_value)
+        twr = 1.0
+        for pr in periods:
+            if pr["return"] is not None:
+                twr *= 1 + pr["return"]
+        metrics["time_weighted_return"] = (twr - 1) if periods else None
+
     summary = {
         "updated": now_s,
+        "periods": periods,
         "capital_flows": sorted(
             [{"t": ts_s(a["timestamp"]), "amount": num(a["usdc_size"]) * (1 if a["type"] == "DEPOSIT" else -1)}
              for a in transfers], key=lambda flow: flow["t"]

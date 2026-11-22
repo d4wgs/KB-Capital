@@ -125,3 +125,18 @@ main.wrap { padding-top: 0; }
 @media (max-width: 760px) {
   .wallet-brand .header-wallet { max-width: clamp(2.5rem, 11vw, 6rem); }
 }
+
+/* Return by deposit period */
+.portfolio .periods { margin-top: 1rem; }
+.periods h2 { margin: 0 0 .2rem; font-size: 1.05rem; }
+.periods-scroll { overflow-x: auto; margin-top: .6rem; }
+.periods-tbl { width: 100%; border-collapse: collapse; font-size: .85rem; white-space: nowrap; }
+.periods-tbl th, .periods-tbl td { padding: .5rem .75rem .5rem 0; text-align: right; border-bottom: 1px solid var(--border); font-weight: 500; }
+.periods-tbl th:first-child, .periods-tbl td:first-child { text-align: left; }
+.periods-tbl thead th { font-size: .75rem; color: var(--muted); font-weight: 600; }
+.periods-tbl tbody th { font-weight: 600; }
+.periods-tbl td.ret { font-weight: 700; }
+.periods-tbl .pos { color: var(--green); }
+.periods-tbl .neg { color: var(--red); }
+.pill-now { margin-left: .5rem; padding: .05rem .4rem; font-size: .68rem; font-weight: 600; background: var(--soft); color: var(--text); }
+#track-twr { color: var(--green); }

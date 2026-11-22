@@ -21,7 +21,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="/style.css?v=15">
-  <link rel="stylesheet" href="/paper.css?v=7">
+  <link rel="stylesheet" href="/paper.css?v=8">
 </head>
 <body class="record portfolio">
   <main class="wrap">
@@ -45,10 +45,11 @@
           <div><dt>Marked portfolio value</dt><dd id="track-nav">--</dd></div>
           <div><dt>Net contributions</dt><dd id="track-capital">--</dd></div>
           <div><dt>Total gain / loss</dt><dd id="track-gain">--</dd></div>
+          <div><dt>Deposit-adjusted return</dt><dd id="track-twr">--</dd></div>
           <div><dt>Saved snapshot (UTC)</dt><dd id="track-time">--</dd></div>
           <div><dt>Latest observed fill (UTC)</dt><dd id="track-fill">--</dd></div>
         </dl>
-        <p class="meta">Return = total gain ÷ net contributions. Open holdings use exchange marks.</p>
+        <p class="meta">Return = total gain ÷ net contributions. Deposit-adjusted return chains each deposit period below, so a large later deposit does not dilute earlier gains. Open holdings use exchange marks.</p>
       </div>
 
       <!-- P&L card -->
@@ -71,6 +72,16 @@
         <div class="pace"><span>Target P&amp;L <strong id="pl-target">--</strong></span><span>Actual less target <strong id="pl-gap">--</strong></span></div>
         <p class="meta">Dotted target compounds at 1% daily and adjusts for deposits and withdrawals.</p>
         <p class="pl-foot" id="pl-foot"></p>
+      </div>
+    </section>
+    <section class="panel periods" id="periods-panel" aria-labelledby="h-periods" hidden>
+      <h2 id="h-periods">Return by deposit period</h2>
+      <p class="meta">A new period starts at every deposit or withdrawal. Each return is that period&rsquo;s gain divided by the portfolio value right after the transfer, so a deposit that doubles the fund starts a fresh base.</p>
+      <div class="periods-scroll">
+        <table class="periods-tbl">
+          <thead><tr><th scope="col">Period</th><th scope="col">Deposit / withdrawal</th><th scope="col">Capital at start</th><th scope="col">Gain / loss</th><th scope="col">Return</th><th scope="col">Per day</th></tr></thead>
+          <tbody id="periods-body"></tbody>
+        </table>
       </div>
     </section>
     <section class="exchange-band" aria-label="Exchange summary">
@@ -126,6 +137,6 @@
     <p>&copy; <span id="year">2026</span> KB Capital. A private portfolio of personal funds. Not accepting outside capital. Data comes from Polymarket's public APIs and is polled about every 30 seconds while this page is open. Saved snapshots are scheduled every 15 minutes. Figures are marked values, not guaranteed. Past results do not predict future results. Nothing here is investment advice, an offer to sell, or a solicitation of an offer to buy any security or interest in any fund. Not affiliated with Polymarket.</p>
   </footer>
 
-  <script src="/script.js?v=15" defer></script>
+  <script src="/script.js?v=16" defer></script>
 </body>
 </html>

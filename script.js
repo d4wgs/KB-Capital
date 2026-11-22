@@ -108,6 +108,90 @@
     return isFinite(t) ? new Date(t).toISOString().slice(0, 19).replace("T", " ") : "--";
   }
 
+  /* ---------- return by deposit period ---------- */
+
+  var PERIOD_CLUSTER_S = 6 * 3600; // transfers closer together than this count as one deposit event
+
+  function toSec(t) { t = Number(t); return t > 1e12 ? t / 1000 : t; }
+
+  // Split the fund's life at each deposit/withdrawal. A period's return is its P&L divided by the portfolio value
+  // right after the transfer, so a large later deposit starts a fresh base instead of diluting earlier gains.
+  // Start P&L comes from the saved snapshot (hourly history); a transfer newer than the snapshot starts at the live P&L.
+  function chartPnlAt(t) {
+    var best = null, bestT = -Infinity;
+    ["all", "1m", "1w", "1d", "12h"].forEach(function (k) {
+      ((S.pnl && S.pnl[k]) || []).forEach(function (p) {
+        if (isNum(p.t) && isNum(p.pnl) && p.t <= t && p.t > bestT) { bestT = p.t; best = p.pnl; }
+      });
+    });
+    return best === null ? (S.pnl ? 0 : null) : best;   // before the first reading the account was at zero
+  }
+
+  function buildPeriods() {
+    var s = S.summary, flows = s && s.capital_flows;
+    if (!Array.isArray(flows) || !flows.length) return null;
+    var events = [];
+    flows.map(function (f) { return { t: toSec(f.t), amount: Number(f.amount) }; })
+      .sort(function (a, b) { return a.t - b.t; })
+      .forEach(function (f) {
+        var last = events[events.length - 1];
+        if (last && f.t - last.t <= PERIOD_CLUSTER_S) { last.t = f.t; last.amount += f.amount; }
+        else events.push({ t: f.t, amount: f.amount });
+      });
+    var saved = S.savedPeriods || [];
+    var savedEnd = saved.length ? saved[saved.length - 1].end_pnl : null;
+    var nowPnl = S.livePnl != null ? S.livePnl : savedEnd;
+    var cum = 0;
+    var out = events.map(function (e) {
+      cum += e.amount;
+      var hit = saved.filter(function (p) { return Math.abs(p.t - e.t) < 2; })[0];
+      // Order of trust: saved hourly value, then the saved P&L chart series (older transfers), then live P&L (brand-new transfer).
+      var p0 = hit ? hit.pnl_start : e.t * 1000 <= S.savedTime ? chartPnlAt(e.t) : nowPnl;
+      if (p0 === null) p0 = nowPnl;
+      return { t: e.t, flow: e.amount, net: cum, p0: p0, start: isNum(p0) ? cum + p0 : null };
+    });
+    out.forEach(function (p, i) {
+      var next = out[i + 1];
+      p.endT = next ? next.t : null;
+      p.p1 = next ? next.p0 : nowPnl;
+      p.gain = isNum(p.p0) && isNum(p.p1) ? p.p1 - p.p0 : null;
+      p.ret = isNum(p.gain) && p.start > 0.5 ? p.gain / p.start : null;
+      var days = ((p.endT || Date.now() / 1000) - p.t) / 86400;
+      p.perDay = isNum(p.ret) && days >= 1 && p.ret > -1 ? Math.pow(1 + p.ret, 1 / days) - 1 : null;
+    });
+    return out;
+  }
+
+  function pct(x, digits) {
+    return isNum(x) ? (x > 0 ? "+" : "") + (100 * x).toFixed(digits == null ? 2 : digits) + "%" : "--";
+  }
+
+  function renderPeriods() {
+    var body = $("periods-body");
+    if (!body) return;
+    var periods = buildPeriods();
+    body.textContent = "";
+    $("periods-panel").hidden = !periods;
+    if (!periods) { $("track-twr").textContent = "--"; return; }
+    var twr = 1, any = false;
+    periods.forEach(function (p) { if (isNum(p.ret)) { twr *= 1 + p.ret; any = true; } });
+    $("track-twr").textContent = any ? pct(twr - 1) : "--";
+    $("track-twr").className = any ? cls(twr - 1) : "";
+    periods.slice().reverse().forEach(function (p) {
+      var cur = p.endT === null;
+      var label = d(new Date(p.t * 1000).toISOString()) + " → " + (cur ? "now" : d(new Date(p.endT * 1000).toISOString()));
+      var th = el("th", { scope: "row", text: label }, cur ? [el("span", { class: "pill-now", text: "current" })] : []);
+      body.appendChild(el("tr", {}, [
+        th,
+        el("td", { text: signedUsd(p.flow) }),
+        el("td", { text: usd(p.start) }),
+        el("td", { class: cls(p.gain), text: signedUsd(p.gain) }),
+        el("td", { class: "ret " + cls(p.ret), text: pct(p.ret) }),
+        el("td", { class: cls(p.perDay), text: p.perDay === null ? "--" : pct(p.perDay) + "/day" })
+      ]));
+    });
+  }
+
   function renderSavedReturn(s) {
     var capital = (s.metrics || {}).net_deposits;
     var gain = isNum(s.total_value) && isNum(capital) ? s.total_value - capital : null;
@@ -118,7 +202,8 @@
       ? (gain > 0 ? "+" : "") + (100 * gain / capital).toFixed(2) + "%" : "--";
     $("track-gain").className = cls(gain);
     $("track-return").className = "big " + cls(capital > 0 ? gain : null);
-    $("track-time").textContent = utcStamp(s.updated);
+    $("track-time").textContent = utcStamp(S.savedUpdated || s.updated);
+    renderPeriods();
   }
 
   function renderLatestFill() {
@@ -751,6 +836,10 @@
       m.largest_position_pct = pv > 0 ? Math.max.apply(null, pos.map(function (p) { return p.value; }).concat(0)) / pv : null;
     }
     if (isNum(r.cash)) s.cash = r.cash;
+    // Net contributions follow the live transfer list, so a new deposit moves it together with cash and portfolio value.
+    if (Array.isArray(s.capital_flows) && s.capital_flows.length) {
+      m.net_deposits = s.capital_flows.reduce(function (t, f) { return t + Number(f.amount); }, 0);
+    }
     if (isNum(s.cash) && isNum(s.positions_value)) {
       s.total_value = s.positions_value + s.cash;
       if (isNum(m.net_deposits)) m.pnl_vs_deposits = s.total_value - m.net_deposits;
@@ -786,6 +875,7 @@
     s.live = true;
     renderLatestFill();
     renderSummary(s);
+    renderSavedReturn(s);
     renderPnl();
     pageDirty(changed);
     refreshThumbsSoon();
@@ -828,17 +918,20 @@
       if (r.activity && Array.isArray(r.activity.data)) {
         var feed = r.activity.data;
         var page = r.activity.pagination;
+        var feedFlows = feed.filter(function (a) {
+          return a.type === "DEPOSIT" || a.type === "WITHDRAWAL";
+        }).map(function (a) {
+          return { t: toSec(a.timestamp), amount: Number(a.usdc_size || a.size) * (a.type === "DEPOSIT" ? 1 : -1) };
+        });
+        var oldest = feed.reduce(function (lo, a) { return Math.min(lo, toSec(a.timestamp)); }, Infinity);
         if (page && !page.has_more && !page.next_cursor) {
-          S.summary.capital_flows = feed.filter(function (a) {
-            return a.type === "DEPOSIT" || a.type === "WITHDRAWAL";
-          }).map(function (a) {
-            return { t: Number(a.timestamp), amount: Number(a.usdc_size) * (a.type === "DEPOSIT" ? 1 : -1) };
-          });
-        } else if (feed.some(function (a) {
-          return (a.type === "DEPOSIT" || a.type === "WITHDRAWAL") && Number(a.timestamp) * 1000 > S.savedTime;
-        }) || (page && page.has_more && feed.every(function (a) { return Number(a.timestamp) * 1000 > S.savedTime; }))) {
-          S.summary.capital_flows = null;
+          S.summary.capital_flows = feedFlows;   // the feed holds the whole history
+        } else if (S.savedFlows && feed.length && oldest * 1000 <= S.savedTime) {
+          // The feed reaches back past the last saved snapshot: keep saved transfers up to then, add newer ones from the feed.
+          S.summary.capital_flows = S.savedFlows.filter(function (f) { return f.t * 1000 <= S.savedTime; })
+            .concat(feedFlows.filter(function (f) { return f.t * 1000 > S.savedTime; }));
         }
+        // Otherwise keep what we have; the next saved snapshot (every 15 minutes) re-reads the full history.
       }
       r.activity = { data: (r.activity && r.activity.data) || [] };
       if (r.closed) r.closed = { data: r.closed.data || [] };
@@ -953,7 +1046,7 @@
     renderPnl();
     renderList();
 
-    get("/data/summary.json").then(function (s) { S.savedTime = Date.parse(s.updated); renderSavedReturn(s); renderSummary(s); renderPnl(); }).catch(function () {
+    get("/data/summary.json").then(function (s) { S.savedTime = Date.parse(s.updated); S.savedUpdated = s.updated; S.savedFlows = (s.capital_flows || []).slice(); S.savedPeriods = s.periods || []; renderSavedReturn(s); renderSummary(s); renderPnl(); }).catch(function () {
       $("updated").textContent = "Data not available yet. The first update runs shortly after setup.";
     }).then(after);
     var done = 0;
