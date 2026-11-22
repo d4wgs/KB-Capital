@@ -338,7 +338,7 @@ body.fit .thead { padding-top: .5rem; }
 .record .who .meta { margin-top: .4rem; }
 .record .panel { padding: var(--gutter); border-radius: .35rem; min-width: 0; }
 .record .panel h2 { font-size: 1.38rem; }
-.record #track-return { margin: 1rem 0 0; font-size: clamp(2.4rem, 4vw, 3.55rem); line-height: 1.1; }
+.record #track-twr { margin: 1rem 0 0; font-size: clamp(2.4rem, 4vw, 3.55rem); line-height: 1.1; }
 .record .profile .cap { margin-bottom: 1.25rem; }
 .record .kv { margin: 0; padding: .9rem 0; gap: .65rem; }
 .record .kv dd { text-align: right; margin: 0; }

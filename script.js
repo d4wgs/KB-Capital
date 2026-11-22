@@ -167,29 +167,11 @@
   }
 
   function renderPeriods() {
-    var body = $("periods-body");
-    if (!body) return;
     var periods = buildPeriods();
-    body.textContent = "";
-    $("periods-panel").hidden = !periods;
-    if (!periods) { $("track-twr").textContent = "--"; return; }
     var twr = 1, any = false;
-    periods.forEach(function (p) { if (isNum(p.ret)) { twr *= 1 + p.ret; any = true; } });
+    (periods || []).forEach(function (p) { if (isNum(p.ret)) { twr *= 1 + p.ret; any = true; } });
     $("track-twr").textContent = any ? pct(twr - 1) : "--";
-    $("track-twr").className = any ? cls(twr - 1) : "";
-    periods.slice().reverse().forEach(function (p) {
-      var cur = p.endT === null;
-      var label = d(new Date(p.t * 1000).toISOString()) + " → " + (cur ? "now" : d(new Date(p.endT * 1000).toISOString()));
-      var th = el("th", { scope: "row", text: label }, cur ? [el("span", { class: "pill-now", text: "current" })] : []);
-      body.appendChild(el("tr", {}, [
-        th,
-        el("td", { text: signedUsd(p.flow) }),
-        el("td", { text: usd(p.start) }),
-        el("td", { class: cls(p.gain), text: signedUsd(p.gain) }),
-        el("td", { class: "ret " + cls(p.ret), text: pct(p.ret) }),
-        el("td", { class: cls(p.perDay), text: p.perDay === null ? "--" : pct(p.perDay) + "/day" })
-      ]));
-    });
+    $("track-twr").className = "big " + (any ? cls(twr - 1) : "");
   }
 
   function renderSavedReturn(s) {
@@ -201,7 +183,7 @@
     $("track-return").textContent = isNum(gain) && capital > 0
       ? (gain > 0 ? "+" : "") + (100 * gain / capital).toFixed(2) + "%" : "--";
     $("track-gain").className = cls(gain);
-    $("track-return").className = "big " + cls(capital > 0 ? gain : null);
+    $("track-return").className = cls(capital > 0 ? gain : null);
     $("track-time").textContent = utcStamp(S.savedUpdated || s.updated);
     renderPeriods();
   }
