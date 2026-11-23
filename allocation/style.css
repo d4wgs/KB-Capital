@@ -48,3 +48,12 @@
 .holding summary .gain { color:#176043; }
 .holding summary .loss { color:#9a3235; }
 @media(prefers-reduced-motion:reduce){ .holding summary::before { transition:none; } }
+.daily-head { margin-top:1rem; }
+#daily-money { font:2.5rem Georgia,serif; }
+#daily-return { margin-left:.6rem; font-variant-numeric:tabular-nums; }
+.holding summary { grid-template-columns:1rem minmax(0,1fr); }
+.holding-comparison { grid-column:2; display:flex; gap:2rem; padding:.5rem 0 .15rem; }
+.holding-comparison span { display:grid; gap:.1rem; }
+.holding .holding-comparison b { grid-area:auto; }
+.holding .holding-comparison small { grid-column:auto; }
+.holding-fills { padding-left:1.1rem; font-size:.85rem; }

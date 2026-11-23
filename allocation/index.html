@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <title>KB Capital | Allocation</title>
   <meta name="description" content="KB Capital wallet allocation, holdings and recent fills.">
-  <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self'; style-src 'self' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data:; connect-src 'self' https://data-api.polymarket.com https://polygon.drpc.org https://1rpc.io https://polygon-bor-rpc.publicnode.com; base-uri 'none'; form-action 'none'">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self'; style-src 'self' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data:; connect-src 'self' https://data-api.polymarket.com https://clob.polymarket.com https://polygon.drpc.org https://1rpc.io https://polygon-bor-rpc.publicnode.com; base-uri 'none'; form-action 'none'">
   <meta name="referrer" content="no-referrer">
   <meta name="color-scheme" content="light">
   <meta name="theme-color" content="#ffffff">
@@ -31,6 +31,10 @@
     </header>
     <div class="section-heading"><h1>Allocation</h1></div>
     <p id="status" role="status">Reading wallet balances…</p>
+    <section class="panel daily-head"><h2>Today’s P&amp;L</h2>
+      <strong id="daily-money">—</strong> <span id="daily-return"></span>
+      <p class="meta" id="daily-date">Since 00:00 UTC · deposits and withdrawals excluded</p>
+    </section>
     <div class="allocation-grid">
       <section class="panel"><h2>Wallet allocation</h2>
         <div id="ring"><canvas id="donut" aria-hidden="true"></canvas><div class="ring-center"><small id="ring-label">Marked NAV</small><strong id="nav">—</strong></div></div>
@@ -53,6 +57,6 @@
   <script src="/wallet-api.js" defer></script>
   <script src="/allocation/vendor/chart.umd.js" defer></script>
   <script src="/allocation/vendor/datalabels.js" defer></script>
-  <script src="/allocation/view.js?v=6" defer></script>
+  <script src="/allocation/view.js?v=7" defer></script>
 </body>
 </html>

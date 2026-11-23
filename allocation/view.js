@@ -8,14 +8,14 @@ const signedDollars = n => n == null ? "—" : (Number(n) > 0 ? "+" : "") + doll
 const percent = n => (100 * n).toFixed(1) + "%";
 let checked;
 
-async function positions(status) {
+async function pages(path, filters) {
   const rows = [];
   const seen = new Set();
   let cursor;
   do {
-    const params = {user:wallet, status, limit:100};
+    const params = {user:wallet, ...filters, limit:100};
     if (cursor) params.cursor = cursor;
-    const page = await walletApi.pollApi("/positions", params);
+    const page = await walletApi.pollApi(path, params);
     if (!Array.isArray(page.data)) throw Error("Missing positions");
     rows.push(...page.data);
     cursor = page.pagination?.next_cursor;
@@ -99,7 +99,7 @@ function drawAllocation(slices, nav) {
   buttons.find(b => b.dataset.slice === focusId)?.focus({preventScroll:true});
 }
 
-function renderHoldings(container, rows, closed) {
+function renderHoldings(container, rows, closed, daily, trades) {
   const expanded = new Set(Array.from(container.querySelectorAll("details[open]"), el => el.dataset.token));
   const focus = container.contains(document.activeElement) ? document.activeElement.closest("details")?.dataset.token : null;
   const cards = rows.map(p => {
@@ -108,13 +108,19 @@ function renderHoldings(container, rows, closed) {
     item.dataset.token = p.token_id;
     item.open = expanded.has(p.token_id);
     const summary = document.createElement("summary");
-    const pnl = Number(p.realized_pnl);
     const signed = signedDollars(p.realized_pnl);
-    const pnlClass = pnl > 0 ? "gain" : pnl < 0 ? "loss" : "";
-    const amount = node("b", closed ? signed : dollars(p.current_value));
-    if (closed) amount.className = pnlClass;
     summary.append(node("strong",p.title),node("small",p.outcome + " · " +
-      (closed ? "Realized P&L" : p.redeemable ? "Redeemable" : "Open")),amount);
+      (closed ? "Closed" : p.redeemable ? "Redeemable" : "Open")));
+    const comparison = node("span","");
+    comparison.className = "holding-comparison";
+    for (const [label,value] of [["Today",daily.get(p.token_id)],["Since entry",p.total_pnl]]) {
+      const cell = node("span","");
+      const figure = node("b",signedDollars(value));
+      figure.className = value > 0 ? "gain" : value < 0 ? "loss" : "";
+      cell.append(node("small",label),figure);
+      comparison.append(cell);
+    }
+    summary.append(comparison);
     const fields = document.createElement("dl");
     fields.className = "holding-fields";
     const shares = Number(closed ? p.total_size : p.current_size).toLocaleString("en-US",{maximumFractionDigits:6});
@@ -135,27 +141,83 @@ function renderHoldings(container, rows, closed) {
       fields.append(field);
     }
     item.append(summary,fields);
+    const marketFills = trades.filter(f => f.type === "TRADE" && f.token_id === p.token_id);
+    if (marketFills.length) {
+      const list = node("ul","");
+      list.className = "holding-fills";
+      for (const f of marketFills) list.append(node("li",new Date(f.timestamp*1000).toLocaleString() + " · " +
+        f.side + " " + Number(f.size).toLocaleString(undefined,{maximumFractionDigits:4}) + " @ " + cents(f.price)));
+      item.append(node("strong","Fills"),list);
+    }
     return item;
   });
   container.replaceChildren(...(cards.length ? cards : [node("p",closed ? "No closed holdings." : "No open or redeemable holdings.")]));
   if (focus) cards.find(c => c.dataset.token === focus)?.firstElementChild.focus({preventScroll:true});
 }
 
-async function refreshHistory() {
-  try {
-    const rows = await positions("CLOSED");
-    rows.sort((a,b) => b.last_event_at-a.last_event_at);
-    renderHoldings(byId("history"),rows,true);
-    byId("history-status").textContent = "";
-  } catch {
-    byId("history-status").textContent = "Couldn’t refresh closed holdings. Retrying in one minute.";
-  } finally {
-    setTimeout(refreshHistory,60000);
-  }
+const openingMarks = new Map();
+async function openingMark(token, start) {
+  const key = start + ":" + token;
+  if (openingMarks.has(key)) return openingMarks.get(key);
+  const params = new URLSearchParams({market:token,startTs:start-3600,endTs:start,fidelity:1});
+  const response = await fetch("https://clob.polymarket.com/prices-history?" + params,{signal:AbortSignal.timeout(10000)});
+  if (!response.ok) return null;
+  const history = (await response.json()).history;
+  const mark = history?.filter(h => h.t <= start && h.t >= start-300).sort((a,b) => b.t-a.t)[0]?.p;
+  if (!Number.isFinite(mark)) return null;
+  openingMarks.set(key,mark);
+  return mark;
 }
+
+async function dailyBreakdown(rows, activity, points, start, nav) {
+  const values = new Map();
+  const opening = points.find(p => p.timestamp === start);
+  if (!opening || !Number.isFinite(opening.position_pnl)) return {values};
+  const overnight = [];
+  let knownOpening = 0;
+  for (const p of rows) {
+    if (!Number.isFinite(p.total_pnl)) return {values:new Map()};
+    if (p.first_entry_at >= start) values.set(p.token_id,p.total_pnl);
+    else if (p.status === "CLOSED" && p.last_event_at < start) {
+      knownOpening += p.total_pnl;
+      values.set(p.token_id,0);
+    } else overnight.push(p);
+  }
+  const today = activity.filter(a => a.timestamp >= start);
+  // A single carried position owns the entire opening position P&L left after prior closes.
+  if (overnight.length === 1) {
+    const p = overnight[0];
+    values.set(p.token_id,p.total_pnl - (opening.position_pnl-knownOpening));
+  } else {
+    await Promise.all(overnight.map(async p => {
+      const events = today.filter(a => a.condition_id === p.condition_id);
+      if (events.some(a => a.type !== "TRADE")) return;
+      let openingSize = Number(p.current_size), proceeds = 0;
+      for (const f of events.filter(f => f.token_id === p.token_id)) {
+        const sign = f.side === "SELL" ? 1 : -1;
+        openingSize += sign*f.size;
+        proceeds += sign*f.usdc_size;
+      }
+      const mark = await openingMark(p.token_id,start).catch(() => null);
+      if (mark != null) values.set(p.token_id,p.current_value + proceeds - openingSize*mark);
+    }));
+  }
+  const latest = points.filter(p => p.timestamp >= start).sort((a,b) => b.timestamp-a.timestamp)[0];
+  const income = p => p.economic_pnl - p.position_pnl;
+  const gain = rows.reduce((sum,p) => sum+p.total_pnl,0) - opening.position_pnl + income(latest)-income(opening);
+  const transfers = today.reduce((sum,a) => sum + (a.type === "DEPOSIT" ? a.usdc_size : a.type === "WITHDRAWAL" ? -a.usdc_size : 0),0);
+  const openingNav = nav-gain-transfers;
+  return {values,gain,rate:openingNav > 0 ? gain/openingNav : null,estimated:overnight.length > 1};
+}
+
 async function refresh() {
   try {
-    const [cash, open, redeemable] = await Promise.all([walletApi.cashOnChain(wallet), positions("OPEN"), positions("REDEEMABLE")]);
+    const start = Math.floor(Date.now()/86400000)*86400;
+    const [cash,open,redeemable,closed,activity,series] = await Promise.all([
+      walletApi.cashOnChain(wallet), ...["OPEN","REDEEMABLE","CLOSED"].map(status => pages("/positions",{status})),
+      pages("/activity",{exclude_deposits_withdrawals:"false"}).catch(() => null),
+      walletApi.pollApi("/user-pnl",{user:wallet,interval:"1w",fidelity:"1h"}).catch(() => null)
+    ]);
     const rows = [...new Map([...open,...redeemable].map(p => [p.token_id,p])).values()];
     if (!Number.isFinite(cash) || rows.some(p => p.current_value == null || !Number.isFinite(Number(p.current_value)))) throw Error("Missing balance");
     rows.sort((a,b) => b.current_value-a.current_value);
@@ -165,7 +227,17 @@ async function refresh() {
     });
     const nav = slices.reduce((sum,s) => sum+s.amount,0);
     drawAllocation(slices, nav);
-    renderHoldings(byId("holdings"), rows, false);
+    const all = [...new Map([...closed,...rows].map(p => [p.token_id,p])).values()];
+    const daily = activity && series?.data?.points ? await dailyBreakdown(all,activity,series.data.points,start,nav) : {values:new Map()};
+    byId("daily-money").textContent = signedDollars(daily.gain);
+    byId("daily-return").textContent = daily.rate == null ? "" : (daily.rate > 0 ? "+" : "") + (daily.rate*100).toFixed(2) + "%";
+    byId("daily-date").textContent = new Date(start*1000).toISOString().slice(0,10) + " · Since 00:00 UTC · " +
+      (daily.gain == null ? "Opening data unavailable" : "Deposits and withdrawals excluded") +
+      (daily.estimated ? " · Overnight holding changes use historical marks and fill amounts before fees." : "");
+    const trades = (activity || []).sort((a,b) => b.timestamp-a.timestamp);
+    renderHoldings(byId("holdings"),rows,false,daily.values,trades);
+    renderHoldings(byId("history"),closed.sort((a,b) => b.last_event_at-a.last_event_at),true,daily.values,trades);
+    byId("history-status").textContent = "";
     checked = new Date().toLocaleString();
     byId("status").textContent = "Polymarket positions and Polygon cash · Updated " + checked;
   } catch {
@@ -215,4 +287,3 @@ async function refreshFills() {
 filter.addEventListener("change",renderFills);
 refreshFills();
 refresh();
-refreshHistory();
