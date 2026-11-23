@@ -7,8 +7,8 @@
   <meta name="description" content="KB Capital wallet allocation, holdings and recent fills.">
   <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self'; style-src 'self' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data:; connect-src 'self' https://data-api.polymarket.com https://clob.polymarket.com https://polygon.drpc.org https://1rpc.io https://polygon-bor-rpc.publicnode.com; base-uri 'none'; form-action 'none'">
   <meta name="referrer" content="no-referrer">
-  <meta name="color-scheme" content="light">
-  <meta name="theme-color" content="#ffffff">
+  <meta name="color-scheme" content="dark">
+  <meta name="theme-color" content="#090e14">
   <link rel="canonical" href="https://kbcap.fund/allocation/">
   <link rel="icon" type="image/png" href="/favicon.png">
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -17,6 +17,8 @@
   <link rel="stylesheet" href="/style.css?v=15">
   <link rel="stylesheet" href="/allocation/style.css?v=5">
   <link rel="stylesheet" href="/paper.css?v=6">
+  <link rel="stylesheet" href="/terminal.css?v=1">
+  <script src="/terminal.js?v=1" defer></script>
 </head>
 <body class="record">
   <main class="wrap">
@@ -34,8 +36,8 @@
     <section class="panel daily-head"><h2>Today’s P&amp;L</h2>
       <strong id="daily-money">—</strong> <span id="daily-return"></span>
       <dl class="daily-targets">
-        <div><dt>Opening portfolio value</dt><dd id="target-base">—</dd></div>
-        <div><dt>Daily target · 1%</dt><dd id="target-profit">—</dd></div>
+        <div><dt>Opening portfolio value<span class="metric-help"><button type="button" aria-expanded="false" aria-label="Explain Opening portfolio value" data-help="Cash plus marked holdings at the start of the UTC day, before today’s gains and transfers.">?</button></span></dt><dd id="target-base">—</dd></div>
+        <div><dt>Daily target · 1%<span class="metric-help"><button type="button" aria-expanded="false" aria-label="Explain Daily target · 1%" data-help="One percent of the portfolio value at midnight UTC. The goal stays fixed through the day.">?</button></span></dt><dd id="target-profit">—</dd></div>
         <div><dt id="target-label">Still needed today</dt><dd id="target-gap">—</dd></div>
       </dl>
       <p class="meta" id="daily-date">Since 00:00 UTC · deposits and withdrawals excluded</p>

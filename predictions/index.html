@@ -9,8 +9,8 @@
        public market API, Google Fonts, and Polymarket's image host. Blocks injected scripts and data theft. -->
   <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self'; style-src 'self' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data: https://polymarket-upload.s3.us-east-2.amazonaws.com; connect-src 'self' https://gamma-api.polymarket.com https://data-api.polymarket.com https://polygon.drpc.org https://1rpc.io https://polygon-bor-rpc.publicnode.com; base-uri 'none'; form-action 'none'">
   <meta name="referrer" content="no-referrer">
-  <meta name="color-scheme" content="light">
-  <meta name="theme-color" content="#ffffff">
+  <meta name="color-scheme" content="dark">
+  <meta name="theme-color" content="#090e14">
   <meta property="og:title" content="KB Capital | Public track record">
   <link rel="canonical" href="https://kbcap.fund/predictions/">
   <meta property="og:image" content="https://kbcap.fund/favicon.png">
@@ -22,6 +22,8 @@
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="/style.css?v=15">
   <link rel="stylesheet" href="/paper.css?v=9">
+  <link rel="stylesheet" href="/terminal.css?v=1">
+  <script src="/terminal.js?v=1" defer></script>
 </head>
 <body class="record portfolio">
   <main class="wrap">
@@ -44,7 +46,7 @@
         <p class="cap">Deposit-adjusted return</p>
         <dl class="kv">
           <div><dt>Marked portfolio value</dt><dd id="track-nav">--</dd></div>
-          <div><dt>Net contributions</dt><dd id="track-capital">--</dd></div>
+          <div><dt>Net contributions<span class="metric-help"><button type="button" aria-expanded="false" aria-label="Explain Net contributions" data-help="Wallet deposits less withdrawals. Trading gains are reported separately.">?</button></span></dt><dd id="track-capital">--</dd></div>
           <div><dt>Total gain / loss</dt><dd id="track-gain">--</dd></div>
           <div><dt>Return on net contributions</dt><dd id="track-return">--</dd></div>
           <div><dt>Saved snapshot (UTC)</dt><dd id="track-time">--</dd></div>
@@ -129,6 +131,6 @@
   </footer>
 
   <script src="/wallet-api.js" defer></script>
-  <script src="/script.js?v=18" defer></script>
+  <script src="/script.js?v=19" defer></script>
 </body>
 </html>

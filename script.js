@@ -361,11 +361,17 @@
     tip.hidden = true;
     box.appendChild(tip);
 
+    var selected = px.length - 1;
     function move(ev) {
       var r = root.getBoundingClientRect();
       var cx = ((ev.clientX - r.left) / r.width) * W;
       var best = 0;
       for (var i = 1; i < px.length; i++) if (Math.abs(px[i] - cx) < Math.abs(px[best] - cx)) best = i;
+      showPoint(best);
+    }
+    function showPoint(best) {
+      selected = best;
+      var r = root.getBoundingClientRect();
       hv.setAttribute("x1", px[best]); hv.setAttribute("x2", px[best]); hv.setAttribute("visibility", "visible");
       dot.setAttribute("cx", px[best]); dot.setAttribute("cy", py[best]); dot.setAttribute("visibility", "visible");
       var when = new Date(xs[best]);
@@ -375,6 +381,18 @@
       tip.style.left = Math.min(Math.max(left, 80), r.width - 80) + "px";
     }
     function leave() { hv.setAttribute("visibility", "hidden"); dot.setAttribute("visibility", "hidden"); tip.hidden = true; }
+    box.tabIndex = 0;
+    box.setAttribute("aria-label","Profit and loss chart. Use left and right arrows to inspect points.");
+    tip.setAttribute("role","status");
+    box.onfocus = function () { showPoint(selected); };
+    box.onblur = leave;
+    box.onkeydown = function (event) {
+      if (event.key === "Escape") leave();
+      if (event.key !== "ArrowLeft" && event.key !== "ArrowRight") return;
+      event.preventDefault();
+      showPoint(Math.max(0,Math.min(px.length-1,selected + (event.key === "ArrowLeft" ? -1 : 1))));
+    };
+    root.addEventListener("pointerdown", move);
     root.addEventListener("pointermove", move);
     root.addEventListener("pointerleave", leave);
   }
