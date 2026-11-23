@@ -90,3 +90,5 @@
 .record .day .n { font-size: .8rem; }
 .record .day .p { font-size: clamp(.57rem, 1.8vw, .84rem); }
 .record .cal-legend { border-top: 1px solid var(--border); padding-top: .85rem; }
+.day .day-target { font-size:clamp(.53rem,1.55vw,.78rem); line-height:1.1; font-variant-numeric:tabular-nums; }
+.day:focus .cal-tip { display:block; }

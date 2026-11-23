@@ -275,6 +275,7 @@ def build_pnl_ranges(now_ts, activity_raw, positions, hourly_out=None):
         if hourly_out is not None:
             hourly_out.extend(hourly)
         if hourly:
+            res["midnight"] = to_rows([(t, v) for t, v in hourly if t % 86400 == 0])
             by_day = {}
             for t, v in hourly:
                 by_day[t // 86400] = (t, v)  # last reading of each UTC day

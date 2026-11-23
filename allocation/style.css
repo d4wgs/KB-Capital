@@ -57,3 +57,6 @@
 .holding .holding-comparison b { grid-area:auto; }
 .holding .holding-comparison small { grid-column:auto; }
 .holding-fills { padding-left:1.1rem; font-size:.85rem; }
+.daily-targets { display:flex; flex-wrap:wrap; gap:1rem 2.5rem; border-top:1px solid #ddd; padding-top:.9rem; }
+.daily-targets dt { color:#535b57; font-size:.85rem; }
+.daily-targets dd { margin:.25rem 0 0; font-weight:650; font-variant-numeric:tabular-nums; }

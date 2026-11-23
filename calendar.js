@@ -28,7 +28,7 @@
   function usd(x) { return x.toLocaleString("en-US", { style: "currency", currency: "USD" }); }
   // Round first so a tiny float like -0.000001 shows as $0.00 / 0.00% with no sign.
   function sUsd(x) { var c = Math.round(x * 100); return (c > 0 ? "+" : c < 0 ? "-" : "") + usd(Math.abs(c) / 100); }
-  function sPct(x) { var c = Math.round(x * 10000); return (c > 0 ? "+" : c < 0 ? "-" : "") + (Math.abs(c) / 100).toFixed(2) + "%"; }
+  function sPct(x) { if (!isNum(x)) return "—"; var c = Math.round(x * 10000); return (c > 0 ? "+" : c < 0 ? "-" : "") + (Math.abs(c) / 100).toFixed(2) + "%"; }
   function dayNum(sec) { return Math.floor(sec / DAY); }           // UTC day index
   function ymd(dn) { var d = new Date(dn * DAY * 1000); return { y: d.getUTCFullYear(), m: d.getUTCMonth(), d: d.getUTCDate(), w: d.getUTCDay() }; }
   function dayOf(y, m, d) { return Math.floor(Date.UTC(y, m, d) / (DAY * 1000)); }
@@ -46,7 +46,7 @@
     var start = trades.length ? Math.min.apply(null, trades) : series.length ? series[0].t : null;
     if (start === null) return false;
     first = dayNum(start);
-    last = Math.max(first, dayNum(Date.now() / 1000));
+    last = Math.max(first, dayNum(Date.parse(summary.updated) / 1000));
 
     var eod = {};                                   // last P&L reading of each day
     series.forEach(function (p) { eod[dayNum(p.t)] = p.pnl; });
@@ -58,15 +58,19 @@
     // profit of a trade made after the last hourly reading is not missed.
     var upd = summary && summary.updated ? new Date(summary.updated).getTime() / 1000 : 0;
     if (isNum(m.total_pnl) && upd > (series.length ? series[series.length - 1].t : 0)) eod[dayNum(upd)] = m.total_pnl;
-    var deposits = isNum(m.net_deposits) ? m.net_deposits
-      : (summary && isNum(summary.total_value) && series.length ? summary.total_value - series[series.length - 1].pnl : null);
-
+    var flows = summary.capital_flows;
+    var opening = new Map(((pnl && pnl.midnight) || []).map(p => [dayNum(p.t), p.pnl]));
     var prev = 0;
     for (var d = first; d <= last; d++) {
-      var cum = eod[d] !== undefined ? eod[d] : prev;   // no reading = nothing changed
-      var base = deposits !== null ? deposits + prev : null;
+      if (opening.has(d)) prev = opening.get(d);
+      var cum = opening.has(d+1) ? opening.get(d+1) : eod[d] !== undefined ? eod[d] : prev;
+      var funded = Array.isArray(flows) ? flows.reduce((sum,f) => sum + (f.t < d*DAY ? f.amount : 0),0) : null;
+      var base = funded === null ? null : funded + prev;
+      if (funded > 0 && isNum(summary.total_value) && isNum(m.total_pnl) && isNum(m.net_deposits)) {
+        base += summary.total_value - m.total_pnl - m.net_deposits;
+      }
       var delta = cum - prev;
-      var pct = base > 0 ? delta / base : 0;
+      var pct = base > 0 ? delta / base : null;
       days[d] = {
         pnl: cum, delta: delta, base: base, pct: pct, hit: pct >= TARGET,
         trades: trades.filter(function (t) { return dayNum(t) === d; }).length
@@ -80,14 +84,18 @@
     var t = ymd(dn);
     var rows = [["P&L", sUsd(r.delta)], ["Return", sPct(r.pct)]];
     if (r.base !== null) rows.push(["Start value", usd(r.base)]);
+    if (r.base > 0) {
+      var target = r.base * TARGET;
+      rows.push(["1% target", usd(target)], [r.hit ? "Above target" : "Gap to target", usd(Math.abs(target-r.delta))]);
+    }
     rows.push(["Trades", String(r.trades)]);
     var dl = el("dl");
     rows.forEach(function (x) { dl.appendChild(el("dt", { text: x[0] })); dl.appendChild(el("dd", { text: x[1] })); });
-    var inProg = dn === last ? " (in progress)" : "";
+    var inProg = dn === dayNum(Date.now()/1000) ? " (in progress)" : "";
     return el("div", { class: "cal-tip", role: "tooltip" }, [
       el("h4", { text: DOW[t.w] + ", " + SHORT[t.m] + " " + t.d + ", " + t.y + inProg }),
       dl,
-      el("p", { class: "st " + (r.hit ? "hit" : "miss"), text: r.hit ? "Hit the 1% target" : "Under the 1% target" })
+      el("p", { class: "st " + (r.hit ? "hit" : "miss"), text: r.pct === null ? "No funded opening balance" : r.hit ? "Hit the 1% target" : "Under the 1% target" })
     ]);
   }
 
@@ -115,11 +123,12 @@
         box.setAttribute("tabindex", "0");
         box.setAttribute("aria-label", MONTHS[view.m] + " " + i + ": " + sUsd(r.delta) + ", " + sPct(r.pct) + (r.hit ? ", hit target" : ", under target"));
         box.appendChild(el("span", { class: "p", text: sPct(r.pct) }));
+        if (r.base > 0) box.appendChild(el("small",{class:"day-target",text:"Goal " + usd(r.base*TARGET)}));
         box.appendChild(tip(dn, r));
-        if (r.hit) hit++; else miss++;
+        if (r.pct !== null) { if (r.hit) hit++; else miss++; }
         total += r.delta;
       }
-      if (dn === last) box.className += " today";
+      if (dn === dayNum(Date.now()/1000)) box.className += " today";
       grid.appendChild(box);
     }
 

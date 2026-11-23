@@ -207,7 +207,7 @@ async function dailyBreakdown(rows, activity, points, start, nav) {
   const gain = rows.reduce((sum,p) => sum+p.total_pnl,0) - opening.position_pnl + income(latest)-income(opening);
   const transfers = today.reduce((sum,a) => sum + (a.type === "DEPOSIT" ? a.usdc_size : a.type === "WITHDRAWAL" ? -a.usdc_size : 0),0);
   const openingNav = nav-gain-transfers;
-  return {values,gain,rate:openingNav > 0 ? gain/openingNav : null,estimated:overnight.length > 1};
+  return {values,gain,openingNav,rate:openingNav > 0 ? gain/openingNav : null,estimated:overnight.length > 1};
 }
 
 async function refresh() {
@@ -230,6 +230,12 @@ async function refresh() {
     const all = [...new Map([...closed,...rows].map(p => [p.token_id,p])).values()];
     const daily = activity && series?.data?.points ? await dailyBreakdown(all,activity,series.data.points,start,nav) : {values:new Map()};
     byId("daily-money").textContent = signedDollars(daily.gain);
+    const target = daily.openingNav > 0 ? daily.openingNav * 0.01 : null;
+    const gap = target == null ? null : target - daily.gain;
+    byId("target-base").textContent = Number.isFinite(daily.openingNav) ? dollars(daily.openingNav) : "—";
+    byId("target-profit").textContent = target == null ? "—" : dollars(target);
+    byId("target-label").textContent = gap < 0 ? "Above target today" : "Still needed today";
+    byId("target-gap").textContent = gap == null ? "—" : dollars(Math.abs(gap));
     byId("daily-return").textContent = daily.rate == null ? "" : (daily.rate > 0 ? "+" : "") + (daily.rate*100).toFixed(2) + "%";
     byId("daily-date").textContent = new Date(start*1000).toISOString().slice(0,10) + " · Since 00:00 UTC · " +
       (daily.gain == null ? "Opening data unavailable" : "Deposits and withdrawals excluded") +
