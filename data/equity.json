@@ -103,5 +103,12 @@
   "positions": 35.84,
   "cash": 680.99,
   "net_deposits": 682.33
+ },
+ {
+  "t": "2026-11-23T12:13:14Z",
+  "total": 711.61,
+  "positions": 30.62,
+  "cash": 680.99,
+  "net_deposits": 682.33
  }
 ]
