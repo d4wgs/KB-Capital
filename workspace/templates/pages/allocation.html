@@ -1,0 +1,33 @@
+{% extends 'PageLayout.html' %}
+{% block content %}
+
+    {{ ui.LoadingState('Reading wallet balances…','status') }}
+    <section class="panel daily-head">{{ ui.SectionHeader('Today’s P&L','') }}
+      <strong id="daily-money">—</strong> <span id="daily-return"></span>
+      <dl class="daily-targets">
+        <div><dt>Opening portfolio value<span class="metric-help"><button type="button" aria-expanded="false" aria-label="Explain Opening portfolio value" data-help="Cash plus marked holdings at the start of the UTC day, before today’s gains and transfers.">?</button></span></dt><dd id="target-base">—</dd></div>
+        <div><dt>Daily target · 1%<span class="metric-help"><button type="button" aria-expanded="false" aria-label="Explain Daily target · 1%" data-help="One percent of the portfolio value at midnight UTC. The goal stays fixed through the day.">?</button></span></dt><dd id="target-profit">—</dd></div>
+        <div><dt id="target-label">Still needed today</dt><dd id="target-gap">—</dd></div>
+      </dl>
+      <p class="meta" id="daily-date">Since 00:00 UTC · deposits and withdrawals excluded</p>
+    </section>
+    <div class="allocation-grid">
+      <section class="panel">{{ ui.SectionHeader('Wallet allocation','') }}
+        <div id="ring"><canvas id="donut" aria-hidden="true"></canvas><div class="ring-center"><small id="ring-label">Marked NAV</small><strong id="nav">—</strong></div></div>
+        <p class="chart-help">Hover or select a holding to inspect its share.</p><div id="legend" aria-label="Wallet allocation breakdown"></div>
+      </section>
+      <section class="panel">{{ ui.SectionHeader('Current holdings','') }}<div id="holdings"></div>
+        <h2 class="history-heading">Closed holdings</h2><p id="history-status" role="status">Loading history…</p><div id="history"></div></section>
+    </div>
+    <section class="panel">{{ ui.SectionHeader('Open orders','') }}
+      <p>Your resting orders are available in your signed-in Polymarket portfolio.</p>
+      <a href="https://polymarket.com/portfolio" target="_blank" rel="noopener noreferrer">Open Polymarket portfolio ↗</a>
+    </section>
+    <section class="panel fills-panel">{{ ui.SectionHeader('Recent wallet fills','') }}
+      <label for="fill-market">Market</label>
+      <select id="fill-market"><option value="">All traded markets</option></select>
+      <p id="fills-status" class="meta" role="status">Reading fills…</p>
+      <div id="fills"></div>
+    </section>
+  {% endblock %}
+{% block footer %}{% endblock %}

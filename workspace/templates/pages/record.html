@@ -1,0 +1,85 @@
+{% extends 'PageLayout.html' %}
+{% block tools %}<div class="section-tools">{{ ui.StatusIndicator('live','Saved data','live saved') }}<button class="icon-btn" id="share" type="button" title="Share" aria-label="Share this page">
+              <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 15V3"/><path d="m7 8 5-5 5 5"/><path d="M5 12v7a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-7"/></svg>
+            </button></div>{% endblock %}
+{% block content %}
+    <div class="header-wallet"><button type="button" id="copy-addr" class="wallet-copy" aria-label="Copy wallet address" disabled><span id="meta"></span><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="11" height="11" rx="2"/><path d="M5 15V6a2 2 0 0 1 2-2h9"/></svg></button>
+            <span id="copy-status" role="status"></span></div><section class="top-grid">
+      <div class="panel profile">
+        {{ ui.SectionHeader('Performance since inception','') }}
+        <p class="big" id="track-twr">--</p>
+        <p class="cap">Deposit-adjusted return</p>
+        <dl class="kv">
+          <div><dt>Marked portfolio value</dt><dd id="track-nav">--</dd></div>
+          <div><dt>Net contributions<span class="metric-help"><button type="button" aria-expanded="false" aria-label="Explain Net contributions" data-help="Wallet deposits less withdrawals. Trading gains are reported separately.">?</button></span></dt><dd id="track-capital">--</dd></div>
+          <div><dt>Total gain / loss</dt><dd id="track-gain">--</dd></div>
+          <div><dt>Return on net contributions</dt><dd id="track-return">--</dd></div>
+          <div><dt>Saved snapshot (UTC)</dt><dd id="track-time">--</dd></div>
+          <div><dt>Latest observed fill (UTC)</dt><dd id="track-fill">--</dd></div>
+        </dl>
+        <p class="meta">Deposit-adjusted return measures each deposit period on the capital invested at the time and chains them, so a large later deposit does not dilute earlier gains. Return on net contributions = total gain ÷ net contributions. Open holdings use exchange marks.</p>
+      </div>
+
+      <!-- P&L card -->
+      <div class="panel pnl">
+        <div class="pnl-head">
+          <div>
+            <p class="pl-label"><span class="arrow" id="pl-arrow">▲</span> Period P&amp;L</p>
+            <p class="pl-value" id="pl-value">--</p>
+          </div>
+          {{ ui.TimeRangeSelector() }}
+        </div>
+        {{ ui.Chart('pl-chart','Profit and loss chart') }}
+        <div class="pace"><span>Target P&amp;L <strong id="pl-target">--</strong></span><span>Actual less target <strong id="pl-gap">--</strong></span></div>
+        <p class="meta">Dotted target compounds at 1% daily and adjusts for deposits and withdrawals.</p>
+        <p class="pl-foot" id="pl-foot"></p>
+      </div>
+    </section>
+    <section class="exchange-band" aria-label="Exchange summary">
+      {% call ui.MetricGrid() %}
+        {{ ui.Metric('Open holdings','--','s-positions') }}
+        {{ ui.Metric('Cash','--','s-cash') }}
+        {{ ui.Metric('Exchange P&L','--','s-pnl') }}
+        {{ ui.Metric('Trading volume','--','s-volume') }}
+        {{ ui.Metric('Largest closed gain','--','s-best') }}
+        {{ ui.Metric('Markets traded','--','s-markets') }}
+      {% endcall %}
+    </section>
+
+    <!-- Positions / Activity -->
+    <section class="lists">
+      {{ ui.Tabs([('positions','Positions'),('activity','Activity')],'positions','v','Portfolio view') }}
+
+      <div id="v-positions">
+        <div class="toolbar">
+          <div class="seg" role="tablist" aria-label="Position status">
+            <button type="button" role="tab" class="on" data-s="active" aria-selected="true">Active</button>
+            <button type="button" role="tab" data-s="closed" aria-selected="false">Closed</button>
+          </div>
+          <label class="search">
+            <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+            <input id="q" type="search" placeholder="Search positions" autocomplete="off">
+          </label>
+          <label class="sort">
+            <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 6h16M7 12h10M10 18h4"/></svg>
+            <select id="sort" aria-label="Sort positions">
+              <option value="value">Value</option>
+              <option value="pnl">Profit/Loss</option>
+              <option value="recent">Latest</option>
+            </select>
+          </label>
+        </div>
+        {{ ui.DataTable('t-positions','Positions') }}
+        <button class="more" id="pos-more" type="button" hidden>Show more</button>
+      </div>
+
+      <div id="v-activity" hidden>
+        {{ ui.DataTable('t-activity','Activity') }}
+        <button class="more" id="act-more" type="button" hidden>Show more</button>
+      </div>
+    </section>
+  {% endblock %}
+{% block footer %}<footer class="foot">
+    <p id="updated">Loading…</p>
+    <p>&copy; <span id="year">2026</span> KB Capital. A private portfolio of personal funds. Not accepting outside capital. Data comes from Polymarket's public APIs and is polled about every 30 seconds while this page is open. Saved snapshots are scheduled every 15 minutes. Figures are marked values, not guaranteed. Past results do not predict future results. Nothing here is investment advice, an offer to sell, or a solicitation of an offer to buy any security or interest in any fund. Not affiliated with Polymarket.</p>
+  </footer>{% endblock %}

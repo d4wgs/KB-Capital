@@ -7,3 +7,7 @@ __pycache__/
 Thumbs.db
 
 *.tmp
+
+.venv/
+.envrc
+.playwright-mcp/

@@ -1,0 +1,32 @@
+{% extends 'PageLayout.html' %}
+{% block content %}
+
+    <section class="panel cal-card" aria-labelledby="cal-title">
+      <div class="cal-head">
+        <div>
+          {{ ui.SectionHeader('Calendar','cal-title') }}
+          <p class="cal-sub" id="cal-sub">Loading…</p>
+        </div>
+        <div class="cal-nav">
+          <button type="button" id="prev" aria-label="Previous month">&lsaquo;</button>
+          <button type="button" id="next" aria-label="Next month">&rsaquo;</button>
+        </div>
+      </div>
+
+      <div class="cal-sum" id="cal-sum" aria-live="polite"></div>
+
+      <div class="cal-dow" aria-hidden="true"><span>Sun</span><span>Mon</span><span>Tue</span><span>Wed</span><span>Thu</span><span>Fri</span><span>Sat</span></div>
+      <div class="cal-grid" id="cal-grid" role="grid" aria-label="Daily results"></div>
+
+      {% call ui.ChartLegend('cal-legend') %}
+        <span><i class="lg hit"></i>1%+ gained</span>
+        <span><i class="lg gain"></i>Gain under 1%</span>
+        <span><i class="lg miss"></i>Lost money</span>
+        <span><i class="lg none"></i>Before first trade / upcoming</span>
+      {% endcall %}
+    </section>
+  {% endblock %}
+{% block footer %}<footer class="foot">
+    <p id="updated"></p>
+    <p>&copy; 2026 KB Capital. Days are UTC. Daily % is the day's change in profit/loss divided by portfolio value at the start of the day (deposits plus profit to date). The current day is still in progress. Figures are marked values and refresh about every 15 minutes. Past results do not predict future results. Nothing here is investment advice. Not affiliated with Polymarket.</p>
+  </footer>{% endblock %}

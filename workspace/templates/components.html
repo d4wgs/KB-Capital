@@ -1,0 +1,17 @@
+{% macro Icon(name) -%}
+<svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="{{ {'overview':'M3 4h18v16H3z M3 9h18 M9 9v11','trend':'M3 4v16h18 M5 15l5-6 4 3 6-8','allocation':'M11 3a9 9 0 1 0 10 10H11z M14 2v8h8a9 9 0 0 0-8-8','calendar':'M3 5h18v16H3z M3 10h18 M8 3v4 M16 3v4','sidebar':'M3 4h18v16H3z M9 4v16','search':'M16 16l5 5 M18 10a8 8 0 1 1-16 0 8 8 0 0 1 16 0'}[name] }}"/></svg>
+{%- endmacro %}
+{% macro Button(label, id='', attrs={}) %}<button type="button" class="ui-button"{% if id %} id="{{ id }}"{% endif %}{{ attrs|xmlattr }}>{{ label }}</button>{% endmacro %}
+{% macro PageHeader(label, tools='') %}<header class="page-header"><h1>{{ label }}</h1>{{ tools }}</header>{% endmacro %}
+{% macro SectionHeader(label,id='') %}<h2 class="section-title"{% if id %} id="{{ id }}"{% endif %}>{{ label }}</h2>{% endmacro %}
+{% macro Metric(label,value,id='') %}<div class="ui-metric"><dt>{{ label }}</dt><dd{% if id %} id="{{ id }}"{% endif %}>{{ value }}</dd></div>{% endmacro %}
+{% macro MetricGrid(classes='') %}<dl class="metric-grid {{ classes }}">{{ caller() }}</dl>{% endmacro %}
+{% macro DataTable(id,label) %}<div class="table" role="table" id="{{ id }}" aria-label="{{ label }}">{% if caller is defined %}{{ caller() }}{% endif %}</div>{% endmacro %}
+{% macro Chart(id,label) %}<div class="pl-chart" id="{{ id }}" role="img" aria-label="{{ label }}">{% if caller is defined %}{{ caller() }}{% endif %}</div>{% endmacro %}
+{% macro ChartLegend(classes='') %}<div class="chart-legend {{ classes }}">{{ caller() }}</div>{% endmacro %}
+{% macro Tabs(options,active,key,label,classes='subtabs') %}<div role="tablist" aria-label="{{ label }}" class="{{ classes }}">{% for value,text in options %}<button type="button" role="tab" data-{{ key }}="{{ value }}" aria-selected="{{ 'true' if value == active else 'false' }}" class="{{ 'on' if value == active }}">{{ text }}</button>{% endfor %}</div>{% endmacro %}
+{% macro TimeRangeSelector() %}{{ Tabs([('1h','1H'),('12h','12H'),('1d','1D'),('1w','1W'),('1m','1M'),('all','ALL')],'1d','r','Profit/Loss range','ranges') }}{% endmacro %}
+{% macro StatusIndicator(id,label,classes='') %}<span class="status-indicator {{ classes }}" id="{{ id }}" role="status"><i aria-hidden="true"></i><b>{{ label }}</b></span>{% endmacro %}
+{% macro LoadingState(label,id='') %}<p class="ui-state" role="status"{% if id %} id="{{ id }}"{% endif %}>{{ label }}</p>{% endmacro %}
+{% macro EmptyState(label) %}<p class="ui-state muted">{{ label }}</p>{% endmacro %}
+{% macro ErrorState(label) %}<p class="ui-state error" role="alert">{{ label }}</p>{% endmacro %}

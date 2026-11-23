@@ -1,0 +1,17 @@
+{% extends 'PageLayout.html' %}
+{% block content %}
+{{ ui.SectionHeader('Metrics') }}
+{% call ui.MetricGrid() %}{{ ui.Metric('Example metric','—') }}{{ ui.Metric('Period','1D') }}{% endcall %}
+{{ ui.SectionHeader('Chart and table') }}
+{% call ui.Chart('sample-chart','Illustrative series rising across three intervals') %}<svg viewBox="0 0 320 70" width="320" height="70" aria-hidden="true"><path d="M0 60H320" fill="none" stroke="currentColor"/><path d="M0 52L100 38L205 44L320 8" fill="none" stroke="var(--accent)" stroke-width="2"/></svg>{% endcall %}
+{% call ui.ChartLegend() %}Example series{% endcall %}
+{% call ui.DataTable('sample-table','Example table') %}<div class="thead" role="row"><span role="columnheader">Series</span><span role="columnheader">Period</span></div><div class="row" role="row"><span role="cell">Example</span><span role="cell">1D</span></div>{% endcall %}
+{{ ui.SectionHeader('Controls and states') }}
+{{ ui.TimeRangeSelector() }}
+{{ ui.Tabs([('table','Table'),('chart','Chart')],'table','v','Example views') }}
+{{ ui.Button('Example button','sample-button') }}
+{{ ui.StatusIndicator('sample-status','Saved data') }}
+{{ ui.LoadingState('Loading example…') }}
+{{ ui.EmptyState('No matching rows.') }}
+{{ ui.ErrorState('Example data unavailable.') }}
+{% endblock %}

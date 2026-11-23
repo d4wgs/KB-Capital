@@ -1,0 +1,27 @@
+:root, body.record {
+  color-scheme: light;
+  --accent: #244FC4;
+  --text: #101114;
+  --muted: #64748B;
+  --surface: #EDF1FA;
+  --bg: #FFFFFF;
+  --green: #11643e;
+  --red: #a02731;
+  --border: #E3E7ED;
+  --body: var(--text);
+  --panel: var(--bg);
+  --blue: var(--accent);
+  --blue-hover: var(--accent);
+  --text-2: var(--muted);
+  --soft: var(--surface);
+  --hover: var(--surface);
+  --seg: var(--surface);
+  --sans: Inter, system-ui, sans-serif;
+  --mono: "IBM Plex Mono", ui-monospace, monospace;
+  --report-width: 1280px;
+  --report-gutter: clamp(1.25rem, 5vw, 4rem);
+  --r: 2px;
+  --space: 1rem;
+  --transition: 160ms ease;
+}
+:root {--sidebar-width:216px;--rail-width:64px;--bar-height:56px;--mobile:0;--space-1:.25rem;--space-2:.5rem;--space-3:.75rem;--space-4:1rem;--space-6:1.5rem;--space-8:2rem;--line:1px solid var(--border);--r:2px}
