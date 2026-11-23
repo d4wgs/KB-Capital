@@ -1,24 +1,13 @@
-# Run the private workspace
+# Public workspace
 
-Install the locked dependencies with `uv sync --frozen`. Use a directory outside the checkout for account records and snapshots. For a first local review:
+KB Capital serves static HTML, CSS, JavaScript and public portfolio snapshots from GitHub Pages. Visitors can open any of the four routes directly without an account.
 
-```sh
-mkdir -p -m 700 ~/.local/state/kb-workspace
-export KB_ACCOUNTS="$HOME/.local/state/kb-workspace/accounts.json"
-uv run python -m workspace.app --create-user operator
-uv run python -m workspace.app --dev --port 8926
-```
+## Development
 
-Visit the localhost port and enter the workspace username and password in the browser prompt. Development mode permits the historical public snapshots and enables the component showcase. The service always requires authentication. The account file contains salted hashes and per-user permission lists. Restart the service after account changes. Browser authentication uses HTTP Basic, followed by an HTTP-only signed session cookie. Closing a session alone does not clear a browser's cached Basic credentials.
+Install the locked template tooling with `uv sync --frozen`. Run `uv run python -m workspace.build --preview` and open http://127.0.0.1:8926/. The preview renders into a temporary directory, includes the component showcase at `/dev/components/`, and serves public assets and snapshot JSON. Restart the preview after editing a template or asset.
 
-## Private operation
+## Publishing
 
-Set `OUT_DIR` to a restricted directory outside this repository. Seed it with the existing snapshot files to retain historical equity and performance series. Run the existing collector with the same public wallet and refresh settings, on the private host, every 15 minutes. For example, schedule the equivalent of the following command with the service account's absolute paths and environment:
+Run `uv run python -m workspace.build` after changing the templates or navigation registry. Commit the regenerated route HTML and workspace.css together with the source changes. Run `uv run python -m unittest discover -s tests` before release. GitHub Pages serves these files directly from main, so the production host requires no Python runtime.
 
-```sh
-WALLET_ADDRESS="$PUBLIC_WALLET" OUT_DIR="$PRIVATE_SNAPSHOT_DIR" uv run python scripts/update.py
-```
-
-Start `uv run python -m workspace.app --port 8926` without the development flag. Put a TLS reverse proxy in front of the loopback listener. Proxy all routes, including assets and data, to the application. Disable shared response caching. Do not configure a static web root for this checkout. Secure cookies require HTTPS outside development. Apply password-attempt rate limiting at the proxy. For multiple workers or organizational SSO, integrate the identity provider before rollout. The current host is a single Waitress process.
-
-The previous deployment uses a public repository, GitHub Pages, and a scheduled job that commits snapshots. This branch removes that public write workflow. Publishing this application requires an authenticated server rather than a Pages branch push. At cutover, disable the old Pages origin and public publisher, switch DNS, and verify direct snapshot URLs with and without credentials. Previously published wallet history, Git history and public blockchain activity remain accessible independently. Keep future private financial files outside source control.
+The existing scheduled workflow updates the public data in `data/` using the public wallet address. Historical and live information continues to use the existing snapshot collector and read-only Polymarket integrations. Keep private research, signing keys, API credentials and privileged execution endpoints outside this public repository and static site.

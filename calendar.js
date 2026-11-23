@@ -20,7 +20,7 @@
     return n;
   }
   function get(url) {
-    return fetch(url + "?v=" + Date.now(), { cache: "no-store", credentials: "same-origin" }).then(function (r) {
+    return fetch(url + "?v=" + Date.now(), { cache: "no-store", credentials: "omit" }).then(function (r) {
       if (!r.ok) throw new Error(url + " " + r.status);
       return r.json();
     });

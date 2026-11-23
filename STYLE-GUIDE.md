@@ -9,7 +9,7 @@ The workspace organizes financial monitoring and research around a fixed navigat
 | Data | IBM Plex Mono, tabular numerals, right-aligned amounts where columns permit |
 | Color | #101114 primary text, #64748B secondary text, #244FC4 active controls, #EDF1FA selections |
 | Financial states | Signed figures and explicit labels alongside green gains and red losses |
-| Navigation | Fund, Trading, Research, Risk and Operations appear as authorized pages become available |
+| Navigation | Fund, Trading, Research, Risk and Operations appear as public pages become available |
 | Responsive shell | Collapsible desktop rail, mobile navigation toggle, keyboard-accessible global page search |
 | Charts and tables | Shared grid, compact legends, visible units and time ranges, expandable trade details |
 

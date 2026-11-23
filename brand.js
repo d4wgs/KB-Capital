@@ -33,25 +33,23 @@
   const dialog = document.querySelector('#workspace-search');
   const input = document.querySelector('#workspace-query');
   const results = document.querySelector('#search-results');
-  let request;
-  async function search() {
-    request?.abort();
-    request = new AbortController();
-    try {
-      const response = await fetch('/workspace-search?q=' + encodeURIComponent(input.value), {signal:request.signal});
-      if (!response.ok) throw Error();
-      const pages = await response.json();
-      const links = pages.map(page => {
+  // Sidebar entries are rendered from the page registry at build time.
+  const pages = Array.from(sidebar.querySelectorAll('nav a'), link => ({
+    route: link.getAttribute('href'),
+    label: link.getAttribute('aria-label'),
+    category: link.dataset.category
+  }));
+  function search() {
+    const query = input.value.trim().toLowerCase();
+    const links = pages.filter(page => (page.category + ' ' + page.label).toLowerCase().includes(query))
+      .map(page => {
         const link = document.createElement('a');
         link.href = page.route;
         link.textContent = page.category + ' / ' + page.label;
         return link;
       });
-      results.replaceChildren(...links);
-      if (!links.length) results.textContent = 'No matching pages.';
-    } catch (error) {
-      if (error.name !== 'AbortError') results.textContent = 'Search unavailable. Try again.';
-    }
+    results.replaceChildren(...links);
+    if (!links.length) results.textContent = 'No matching pages.';
   }
   function openSearch() {
     if (dialog.open) return;

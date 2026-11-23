@@ -1,0 +1,86 @@
+:root, body.record {
+  color-scheme: light;
+  --accent: #244FC4;
+  --text: #101114;
+  --muted: #64748B;
+  --surface: #EDF1FA;
+  --bg: #FFFFFF;
+  --green: #11643e;
+  --red: #a02731;
+  --border: #E3E7ED;
+  --body: var(--text);
+  --panel: var(--bg);
+  --blue: var(--accent);
+  --blue-hover: var(--accent);
+  --text-2: var(--muted);
+  --soft: var(--surface);
+  --hover: var(--surface);
+  --seg: var(--surface);
+  --sans: Inter, system-ui, sans-serif;
+  --mono: "IBM Plex Mono", ui-monospace, monospace;
+  --report-width: 1280px;
+  --report-gutter: clamp(1.25rem, 5vw, 4rem);
+  --r: 2px;
+  --space: 1rem;
+  --transition: 160ms ease;
+}
+:root {--sidebar-width:216px;--rail-width:64px;--bar-height:56px;--mobile:0;--space-1:.25rem;--space-2:.5rem;--space-3:.75rem;--space-4:1rem;--space-6:1.5rem;--space-8:2rem;--line:1px solid var(--border);--r:2px}
+/* Shared shell geometry. The JS controller reads --mobile from this stylesheet. */
+
+.workspace {margin:0;display:block;min-height:100vh;font:400 .9375rem/1.55 var(--sans);counter-reset:section}
+.workspace *, .workspace *::before,.workspace *::after {box-sizing:border-box}
+.workspace.rail {--sidebar-width:var(--rail-width)}
+#sidebar {position:fixed;inset:0 auto 0 0;width:var(--sidebar-width);background:var(--bg);border-right:var(--line);z-index:21;overflow:auto}
+#sidebar .wordmark {height:var(--bar-height);width:100%;padding-inline:1rem;border-bottom:var(--line);align-items:center}
+#sidebar nav {padding:1.75rem .6rem}
+#sidebar h2 {font:500 .72rem var(--mono);text-transform:uppercase;letter-spacing:.08em;color:var(--muted);margin:0 .6rem .6rem}
+#sidebar nav a {display:flex;align-items:center;gap:.75rem;padding:.55rem .65rem;border-left:2px solid transparent;text-decoration:none;color:var(--text);font-size:.9rem}
+#sidebar nav a:hover,.search-control:hover,.ui-button:hover {background:var(--surface)}
+#sidebar nav a[aria-current] {color:var(--accent);border-color:var(--accent);background:var(--surface)}
+.rail #sidebar span,.rail #sidebar h2 {display:none}
+.work-area {margin-left:var(--sidebar-width);min-width:0}
+.workspace-bar {position:sticky;top:0;z-index:20;height:var(--bar-height);display:flex;align-items:center;gap:1rem;padding:0 var(--report-gutter);background:var(--bg);border-bottom:var(--line)}
+.workspace button,.workspace select,.workspace input {font-family:var(--sans);border-radius:var(--r)}
+.icon-control,.search-control,.ui-button {display:inline-flex;align-items:center;justify-content:center;gap:.6rem;background:white;color:var(--text);border:var(--line);padding:.4rem .7rem;cursor:pointer}
+.search-control {margin-left:auto;color:var(--muted)}
+.breadcrumbs {display:flex;gap:.6rem;color:var(--muted);font-size:.82rem}
+.breadcrumbs strong {font-weight:500;color:var(--text)}
+kbd {font:.69rem var(--mono);color:var(--muted)}
+.workspace-grid {width:100%;max-width:var(--report-width);padding:1.5rem var(--report-gutter) 3rem;margin:auto;min-width:0}
+.page-header {display:flex;align-items:center;justify-content:space-between;gap:1rem;border-bottom:1px solid var(--text);padding:0 0 1rem;margin:0 0 1.4rem}
+.page-header h1 {font:600 clamp(1.85rem,3vw,2.8rem)/1.1 var(--sans);letter-spacing:-.055em;margin:0}
+.workspace .section-title::before {counter-increment:section;content:counter(section,decimal-leading-zero);display:inline-block;color:var(--accent);font:500 .72rem var(--mono);vertical-align:middle;margin-right:.7rem;letter-spacing:0}
+.workspace .section-title {font-weight:600}
+.workspace .panel,.workspace .toolbar,.workspace .figs,.workspace .exchange-band dl {background:white;border:0;border-radius:0;box-shadow:none}
+.workspace .panel {border-top:var(--line);padding:1rem 0}
+.workspace .top-grid,.workspace .allocation-grid {gap:1.5rem}
+.workspace .metric-grid {display:grid;grid-template-columns:repeat(auto-fit,minmax(7rem,1fr));gap:1rem;border-block:var(--line);padding-block:1rem}
+.metric-grid dt {font-size:.78rem;color:var(--muted)}.metric-grid dd {margin:0;font:500 1.2rem var(--mono)}
+.workspace .top-grid>.panel+.panel,.workspace .allocation-grid>.panel+.panel {border-left:var(--line);padding-left:1.5rem}
+.workspace .workspace-grid .wrap {padding-inline:0}
+.workspace .figures {background:white;border-top:var(--line)}
+.workspace .hero {padding:1rem 0 2rem}
+.workspace .hero #h-hero {font:600 clamp(1.8rem,4vw,3rem)/1.15 var(--sans);letter-spacing:-.055em;margin:.8rem 0}
+.workspace .plot {background:none}
+.workspace .plot::before,.workspace .plot::after {display:none}
+.workspace .hero kb-gaussian {max-width:26rem}
+.workspace .pill,.workspace .day,.workspace .thumb {border-radius:var(--r)}
+.workspace .cal-tip,.workspace .detail {box-shadow:none}
+.workspace .ui-state {padding:.65rem 0;color:var(--muted)}
+.workspace .ui-state.error {color:var(--red)}
+#workspace-search {width:min(32rem,90vw);border:1px solid var(--text);padding:1.25rem;color:var(--text)}
+#workspace-search::backdrop {background:rgb(16 17 20 / .2)}
+#workspace-search header {display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem;font-weight:600}
+#workspace-query {width:100%;border:var(--line);padding:.7rem;font:inherit}
+#search-results a {display:block;padding:.65rem 0;border-bottom:var(--line);color:var(--text)}
+.workspace .foot,.workspace .site-footer {padding-inline:var(--report-gutter)}
+@media(max-width:800px){
+ .workspace {--mobile:1}
+ #sidebar {display:none;top:var(--bar-height);bottom:0}
+ .nav-open #sidebar {display:block}
+ .work-area {margin-left:0}
+ .workspace-bar {gap:.65rem}
+ .search-control span,.search-control kbd {display:none}
+ .workspace .top-grid,.workspace .allocation-grid {grid-template-columns:1fr}
+ .workspace .top-grid>.panel+.panel,.workspace .allocation-grid>.panel+.panel {border-left:0;padding-left:0}
+}

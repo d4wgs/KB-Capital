@@ -3,9 +3,9 @@
 
 Uses only public, read-only endpoints. No API key and no private key are needed.
 The only input is your PUBLIC wallet address (the one shown on your Polymarket
-profile), supplied through WALLET_ADDRESS.
+profile), set as the WALLET_ADDRESS variable in the GitHub repo.
 
-Writes to the private OUT_DIR:
+Writes to ./data:
   summary.json    headline numbers and metrics
   positions.json  open positions (and resolved ones waiting to be redeemed)
   closed.json     position history (closed / settled)
@@ -41,9 +41,7 @@ PUSD_DECIMALS = 6
 # Short-duration strategies can be copied or traded against if posted live.
 TRADE_DELAY_HOURS = float(os.environ.get("TRADE_DELAY_HOURS") or "0")
 
-OUT = Path(os.environ["OUT_DIR"]).expanduser().resolve()
-if OUT.is_relative_to(Path(__file__).resolve().parent.parent):
-    raise SystemExit("Choose a private OUT_DIR outside the checkout.")
+OUT = Path(os.environ.get("OUT_DIR", Path(__file__).resolve().parent.parent / "data"))
 MAX_PAGES = 60
 EQUITY_MIN_GAP_S = 3300  # at most about one snapshot per hour
 EQUITY_MAX_POINTS = 20000

@@ -10,7 +10,7 @@ class Page:
     icon: str
     category: str
     template: str
-    access: str = "fund:read"
+    access: str = "public"
     styles: tuple = ()
     scripts: tuple = ()
     body_class: str = "record"

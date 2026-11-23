@@ -1,42 +1,31 @@
+import tempfile
 import unittest
 from pathlib import Path
-from werkzeug.security import generate_password_hash
-from workspace.app import create_app
-from workspace.registry import PAGES
+
+from workspace.build import ROOT, build
+from workspace.registry import PAGES, SHOWCASE
 
 
-class WorkspaceAccessTests(unittest.TestCase):
-    @classmethod
-    def setUpClass(cls):
-        hashed = generate_password_hash("example")
-        cls.accounts = {name: {"hash": hashed, "permissions": scopes} for name, scopes in
-                        [("operator", ["fund:read"]), ("guest", [])]}
-        cls.root = Path(__file__).resolve().parents[1] / "data"
+class PublicWorkspaceTests(unittest.TestCase):
+    def test_production_output_matches_checkout(self):
+        with tempfile.TemporaryDirectory() as directory:
+            out = Path(directory)
+            build(out)
+            for page in PAGES:
+                path = Path(page.route.strip("/")) / "index.html"
+                html = (out / path).read_text()
+                self.assertEqual(html, (ROOT / path).read_text())
+                self.assertIn('id="sidebar"', html)
+                self.assertNotIn(SHOWCASE.route, html)
+                for asset in (*page.styles, *page.scripts):
+                    self.assertTrue((out / asset).is_file())
+            self.assertEqual((out / "workspace.css").read_bytes(), (ROOT / "workspace.css").read_bytes())
+            self.assertFalse((out / "dev/components/index.html").exists())
+            self.assertTrue((out / "data/summary.json").is_file())
 
-    def client(self, development=False):
-        return create_app(self.accounts, self.root, development).test_client()
-
-    def test_direct_access(self):
-        client = self.client()
-        for path in [p.route for p in PAGES] + ["/data/summary.json", "/workspace-search", "/allocation/view.js"]:
-            self.assertEqual(client.get(path).status_code, 401)
-        self.assertEqual(client.get("/", auth=("operator", "wrong")).status_code, 401)
-        client.get("/", auth=("guest", "example"))
-        for path in [p.route for p in PAGES] + ["/data/summary.json", "/allocation/view.js"]:
-            self.assertEqual(client.get(path).status_code, 403)
-        self.assertEqual(client.get("/workspace-search").json, [])
-
-    def test_routes_and_showcase(self):
-        client = self.client()
-        client.get("/", auth=("operator", "example"))
-        for page in PAGES:
-            html = client.get(page.route)
-            self.assertEqual(html.status_code, 200)
-            self.assertIn(b'id="sidebar"', html.data)
-        self.assertEqual(client.get("/workspace-search?q=track").json[0]["route"], "/predictions/")
-        for path in ["/dev/components/", "/.envrc", "/.git/config", "/data/accounts.json"]:
-            self.assertEqual(client.get(path).status_code, 404)
-        with client.get("/data/summary.json") as snapshot:
-            self.assertEqual(snapshot.status_code, 200)
-            self.assertIn("no-store", snapshot.headers["Cache-Control"])
-        self.assertEqual(self.client(True).get("/dev/components/", auth=("operator", "example")).status_code, 200)
+    def test_development_showcase(self):
+        with tempfile.TemporaryDirectory() as directory:
+            out = Path(directory)
+            build(out, showcase=True)
+            self.assertTrue((out / "dev/components/index.html").is_file())
+            self.assertIn(SHOWCASE.route, (out / "index.html").read_text())

@@ -1,6 +1,8 @@
 {% import 'components.html' as ui %}
 <!doctype html><html lang="en"><head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="referrer" content="no-referrer">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self'; style-src 'self' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data: https://polymarket-upload.s3.us-east-2.amazonaws.com; connect-src 'self' https://gamma-api.polymarket.com https://data-api.polymarket.com https://clob.polymarket.com https://polygon.drpc.org https://1rpc.io https://polygon-bor-rpc.publicnode.com; base-uri 'none'; form-action 'none'">
 <title>{{ page.label }} · KB Capital</title><link rel="icon" href="/gaussian.svg">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&amp;family=Inter:wght@400;500;600;700&amp;display=swap">
 {% for style in page.styles %}<link rel="stylesheet" href="/{{ style }}">{% endfor %}
@@ -10,7 +12,7 @@
 </head><body class="{{ page.body_class }} workspace">
 <a class="skip" href="#main-content">Skip to content</a>
 <aside id="sidebar"><a class="wordmark" href="/" aria-label="KB Capital"><img width="30" height="30" src="/gaussian.svg" alt=""><span>kb capital</span></a>
-<nav aria-label="Workspace pages">{% for group in groups %}{% set entries=pages|selectattr('category','equalto',group)|list %}{% if entries %}<h2>{{ group }}</h2>{% for item in entries %}<a href="{{ item.route }}" title="{{ item.label }}" aria-label="{{ item.label }}" {% if page.route==item.route %}aria-current="page"{% endif %}>{{ ui.Icon(item.icon) }}<span>{{ item.label }}</span></a>{% endfor %}{% endif %}{% endfor %}</nav>
+<nav aria-label="Workspace pages">{% for group in groups %}{% set entries=pages|selectattr('category','equalto',group)|list %}{% if entries %}<h2>{{ group }}</h2>{% for item in entries %}<a data-category="{{ group }}" href="{{ item.route }}" title="{{ item.label }}" aria-label="{{ item.label }}" {% if page.route==item.route %}aria-current="page"{% endif %}>{{ ui.Icon(item.icon) }}<span>{{ item.label }}</span></a>{% endfor %}{% endif %}{% endfor %}</nav>
 </aside>
 <div class="work-area"><div class="workspace-bar">
 <button class="icon-control" id="toggle-sidebar" aria-label="Toggle sidebar" aria-controls="sidebar" aria-expanded="true">{{ ui.Icon('sidebar') }}</button>

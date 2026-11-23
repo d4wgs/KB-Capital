@@ -1,0 +1,105 @@
+
+<!doctype html><html lang="en"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="referrer" content="no-referrer">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self'; style-src 'self' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data: https://polymarket-upload.s3.us-east-2.amazonaws.com; connect-src 'self' https://gamma-api.polymarket.com https://data-api.polymarket.com https://clob.polymarket.com https://polygon.drpc.org https://1rpc.io https://polygon-bor-rpc.publicnode.com; base-uri 'none'; form-action 'none'">
+<title>Track record · KB Capital</title><link rel="icon" href="/gaussian.svg">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&amp;family=Inter:wght@400;500;600;700&amp;display=swap">
+<link rel="stylesheet" href="/style.css"><link rel="stylesheet" href="/paper.css">
+<link rel="stylesheet" href="/brand.css"><link rel="stylesheet" href="/workspace.css">
+<script defer src="/brand.js"></script><script defer src="/terminal.js"></script>
+<script defer src="/wallet-api.js"></script><script defer src="/script.js"></script>
+</head><body class="record portfolio workspace">
+<a class="skip" href="#main-content">Skip to content</a>
+<aside id="sidebar"><a class="wordmark" href="/" aria-label="KB Capital"><img width="30" height="30" src="/gaussian.svg" alt=""><span>kb capital</span></a>
+<nav aria-label="Workspace pages"><h2>Fund</h2><a data-category="Fund" href="/" title="About us" aria-label="About us" ><svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 4h18v16H3z M3 9h18 M9 9v11"/></svg><span>About us</span></a><a data-category="Fund" href="/predictions/" title="Track record" aria-label="Track record" aria-current="page"><svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 4v16h18 M5 15l5-6 4 3 6-8"/></svg><span>Track record</span></a><a data-category="Fund" href="/allocation/" title="Allocation" aria-label="Allocation" ><svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M11 3a9 9 0 1 0 10 10H11z M14 2v8h8a9 9 0 0 0-8-8"/></svg><span>Allocation</span></a><a data-category="Fund" href="/calendar/" title="Calendar" aria-label="Calendar" ><svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 5h18v16H3z M3 10h18 M8 3v4 M16 3v4"/></svg><span>Calendar</span></a></nav>
+</aside>
+<div class="work-area"><div class="workspace-bar">
+<button class="icon-control" id="toggle-sidebar" aria-label="Toggle sidebar" aria-controls="sidebar" aria-expanded="true"><svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 4h18v16H3z M9 4v16"/></svg></button>
+<nav class="breadcrumbs" aria-label="Breadcrumb"><span>Fund</span><span aria-hidden="true"> / </span><strong aria-current="page">Track record</strong></nav>
+<button id="open-search" class="search-control" aria-label="Search workspace"><svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M16 16l5 5 M18 10a8 8 0 1 1-16 0 8 8 0 0 1 16 0"/></svg><span>Search workspace</span><kbd>⌘ / Ctrl K</kbd></button></div>
+<main id="main-content" class="workspace-grid" tabindex="-1"><header class="page-header"><h1>Track record</h1><div class="section-tools"><span class="status-indicator live saved" id="live" role="status"><i aria-hidden="true"></i><b>Saved data</b></span><button class="icon-btn" id="share" type="button" title="Share" aria-label="Share this page">
+              <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 15V3"/><path d="m7 8 5-5 5 5"/><path d="M5 12v7a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-7"/></svg>
+            </button></div></header>
+
+    <div class="header-wallet"><button type="button" id="copy-addr" class="wallet-copy" aria-label="Copy wallet address" disabled><span id="meta"></span><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="11" height="11" rx="2"/><path d="M5 15V6a2 2 0 0 1 2-2h9"/></svg></button>
+            <span id="copy-status" role="status"></span></div><section class="top-grid">
+      <div class="panel profile">
+        <h2 class="section-title">Performance since inception</h2>
+        <p class="big" id="track-twr">--</p>
+        <p class="cap">Deposit-adjusted return</p>
+        <dl class="kv">
+          <div><dt>Marked portfolio value</dt><dd id="track-nav">--</dd></div>
+          <div><dt>Net contributions<span class="metric-help"><button type="button" aria-expanded="false" aria-label="Explain Net contributions" data-help="Wallet deposits less withdrawals. Trading gains are reported separately.">?</button></span></dt><dd id="track-capital">--</dd></div>
+          <div><dt>Total gain / loss</dt><dd id="track-gain">--</dd></div>
+          <div><dt>Return on net contributions</dt><dd id="track-return">--</dd></div>
+          <div><dt>Saved snapshot (UTC)</dt><dd id="track-time">--</dd></div>
+          <div><dt>Latest observed fill (UTC)</dt><dd id="track-fill">--</dd></div>
+        </dl>
+        <p class="meta">Deposit-adjusted return measures each deposit period on the capital invested at the time and chains them, so a large later deposit does not dilute earlier gains. Return on net contributions = total gain ÷ net contributions. Open holdings use exchange marks.</p>
+      </div>
+
+      <!-- P&L card -->
+      <div class="panel pnl">
+        <div class="pnl-head">
+          <div>
+            <p class="pl-label"><span class="arrow" id="pl-arrow">▲</span> Period P&amp;L</p>
+            <p class="pl-value" id="pl-value">--</p>
+          </div>
+          <div role="tablist" aria-label="Profit/Loss range" class="ranges"><button type="button" role="tab" data-r="1h" aria-selected="false" class="">1H</button><button type="button" role="tab" data-r="12h" aria-selected="false" class="">12H</button><button type="button" role="tab" data-r="1d" aria-selected="true" class="on">1D</button><button type="button" role="tab" data-r="1w" aria-selected="false" class="">1W</button><button type="button" role="tab" data-r="1m" aria-selected="false" class="">1M</button><button type="button" role="tab" data-r="all" aria-selected="false" class="">ALL</button></div>
+        </div>
+        <div class="pl-chart" id="pl-chart" role="img" aria-label="Profit and loss chart"></div>
+        <div class="pace"><span>Target P&amp;L <strong id="pl-target">--</strong></span><span>Actual less target <strong id="pl-gap">--</strong></span></div>
+        <p class="meta">Dotted target compounds at 1% daily and adjusts for deposits and withdrawals.</p>
+        <p class="pl-foot" id="pl-foot"></p>
+      </div>
+    </section>
+    <section class="exchange-band" aria-label="Exchange summary">
+      <dl class="metric-grid ">
+        <div class="ui-metric"><dt>Open holdings</dt><dd id="s-positions">--</dd></div>
+        <div class="ui-metric"><dt>Cash</dt><dd id="s-cash">--</dd></div>
+        <div class="ui-metric"><dt>Exchange P&L</dt><dd id="s-pnl">--</dd></div>
+        <div class="ui-metric"><dt>Trading volume</dt><dd id="s-volume">--</dd></div>
+        <div class="ui-metric"><dt>Largest closed gain</dt><dd id="s-best">--</dd></div>
+        <div class="ui-metric"><dt>Markets traded</dt><dd id="s-markets">--</dd></div>
+      </dl>
+    </section>
+
+    <!-- Positions / Activity -->
+    <section class="lists">
+      <div role="tablist" aria-label="Portfolio view" class="subtabs"><button type="button" role="tab" data-v="positions" aria-selected="true" class="on">Positions</button><button type="button" role="tab" data-v="activity" aria-selected="false" class="">Activity</button></div>
+
+      <div id="v-positions">
+        <div class="toolbar">
+          <div class="seg" role="tablist" aria-label="Position status">
+            <button type="button" role="tab" class="on" data-s="active" aria-selected="true">Active</button>
+            <button type="button" role="tab" data-s="closed" aria-selected="false">Closed</button>
+          </div>
+          <label class="search">
+            <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+            <input id="q" type="search" placeholder="Search positions" autocomplete="off">
+          </label>
+          <label class="sort">
+            <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 6h16M7 12h10M10 18h4"/></svg>
+            <select id="sort" aria-label="Sort positions">
+              <option value="value">Value</option>
+              <option value="pnl">Profit/Loss</option>
+              <option value="recent">Latest</option>
+            </select>
+          </label>
+        </div>
+        <div class="table" role="table" id="t-positions" aria-label="Positions"></div>
+        <button class="more" id="pos-more" type="button" hidden>Show more</button>
+      </div>
+
+      <div id="v-activity" hidden>
+        <div class="table" role="table" id="t-activity" aria-label="Activity"></div>
+        <button class="more" id="act-more" type="button" hidden>Show more</button>
+      </div>
+    </section>
+  </main><footer class="foot">
+    <p id="updated">Loading…</p>
+    <p>&copy; <span id="year">2026</span> KB Capital. A private portfolio of personal funds. Not accepting outside capital. Data comes from Polymarket's public APIs and is polled about every 30 seconds while this page is open. Saved snapshots are scheduled every 15 minutes. Figures are marked values, not guaranteed. Past results do not predict future results. Nothing here is investment advice, an offer to sell, or a solicitation of an offer to buy any security or interest in any fund. Not affiliated with Polymarket.</p>
+  </footer></div>
+<dialog id="workspace-search" aria-labelledby="search-label"><header><label id="search-label" for="workspace-query">Search workspace</label><button type="button" class="ui-button" id="close-search">Close</button></header><input type="search" id="workspace-query" placeholder="Search pages" autocomplete="off"><div id="search-results" aria-live="polite"></div></dialog>
+</body></html>
