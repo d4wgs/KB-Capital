@@ -678,20 +678,84 @@
     more.textContent = "Show more (" + (rows.length - S.shownPos) + " left)";
   }
 
+  function groupActivity(history) {
+    var active = new Map();
+    var groups = [];
+    // The feed is newest first. Reverse before sorting to retain fill order at tied timestamps.
+    history.slice().reverse().sort(function (a, b) { return Date.parse(a.time) - Date.parse(b.time); })
+      .forEach(function (a) {
+        var key = JSON.stringify([a.slug, a.outcome]);
+        if (a.type !== "TRADE" || !a.slug || !a.outcome || !["BUY", "SELL"].includes(a.side) || !isNum(a.shares)) {
+          groups.push({latest: a, standalone: true});
+          if (a.type === "REDEEM") active.forEach(function (group, id) {
+            if (group.latest.slug === a.slug) active.delete(id);
+          });
+          return;
+        }
+        var play = active.get(key);
+        if (!play) {
+          play = {fills: [], balance: 0, bought: 0, sold: 0, partial: a.side === "SELL",
+            id: JSON.stringify([key, a.time, a.tx])};
+          active.set(key, play);
+          groups.push(play);
+        }
+        play.latest = a;
+        play.fills.push(a);
+        if (a.side === "BUY") {
+          play.balance += a.shares;
+          play.bought += a.shares;
+        } else {
+          play.balance -= a.shares;
+          play.sold += a.shares;
+        }
+        if (play.balance < -0.0000005) play.partial = true;
+        if (!play.partial && Math.abs(play.balance) < 0.0000005) active.delete(key);
+      });
+    return groups.reverse().sort(function (a, b) { return Date.parse(b.latest.time) - Date.parse(a.latest.time); });
+  }
+
+  function playRow(play, expanded) {
+    var a = play.latest;
+    var status = play.partial ? "Partial history" : Math.abs(play.balance) < 0.0000005 ? "Closed" : shares(play.balance) + " shares net";
+    var summary = el("summary", {class: "row play-summary"}, [
+      thumb(a),
+      el("div", {class: "mkt-text"}, [
+        el("div", {class: "mkt-title", text: a.title || "Unknown market"}),
+        el("div", {class: "sub"}, [
+          el("span", {class: side(a.outcome), text: a.outcome}),
+          el("span", {text: status})
+        ])
+      ]),
+      el("span", {class: "fill-count", text: play.fills.length + (play.fills.length === 1 ? " fill" : " fills")}),
+      el("span", {class: "play-chevron", "aria-hidden": "true", text: "⌄"})
+    ]);
+    var list = el("div", {class: "play-fills"}, [
+      el("p", {class: "play-totals", text: shares(play.bought) + " shares bought · " + shares(play.sold) + " shares sold"}),
+      head([["Side"], ["Fill"], ["Amount", "r"], ["Time", "r c-time-h"]], "act")
+    ]);
+    play.fills.forEach(function (fill) { list.appendChild(actRow(fill)); });
+    var details = el("details", {class: "play", "data-play": play.id}, [summary, list]);
+    details.open = expanded.has(play.id);
+    return details;
+  }
+
   function renderActivity() {
     var t = $("t-activity");
+    var expanded = new Set(Array.from(t.querySelectorAll("details[open]"), function (node) { return node.dataset.play; }));
+    var plays = groupActivity(S.activity);
     t.textContent = "";
     t.className = "table act";
-    t.appendChild(head([["Type"], ["Market"], ["Amount", "r"], ["Time", "r c-time-h"]], "act"));
     if (!S.activity.length) {
       t.appendChild(el("p", { class: "empty-msg", text: "No activity yet" }));
       $("act-more").hidden = true;
       return;
     }
-    S.activity.slice(0, S.shownAct).forEach(function (a) { t.appendChild(actRow(a)); });
+    plays.slice(0, S.shownAct).forEach(function (play) {
+      t.appendChild(play.standalone ? actRow(play.latest) : playRow(play, expanded));
+    });
     var more = $("act-more");
-    more.hidden = S.activity.length <= S.shownAct;
-    more.textContent = "Show more (" + (S.activity.length - S.shownAct) + " left)";
+    more.hidden = plays.length <= S.shownAct;
+    more.textContent = "Show more (" + (plays.length - S.shownAct) + " left)";
   }
 
   /* ---------- sorting ---------- */
@@ -908,6 +972,13 @@
     });
   }
 
+  function scheduleLiveTick() {
+    clearTimeout(L.timer);
+    if (!document.hidden && navigator.onLine !== false && !L.busy) {
+      L.timer = setTimeout(liveTick, L.delay + Math.random() * 5000);
+    }
+  }
+
   function liveTick() {
     clearTimeout(L.timer);
     if (document.hidden || navigator.onLine === false) { setLiveBadge("paused"); return; }
@@ -923,7 +994,7 @@
       setLiveBadge(L.last ? "retry" : "saved");
     }).then(function () {
       L.busy = false;
-      if (!document.hidden) L.timer = setTimeout(liveTick, L.delay + Math.random() * 5000); // jitter spreads visitors out
+      scheduleLiveTick();
     });
   }
 
@@ -933,7 +1004,10 @@
     setLiveBadge("saved");
     document.addEventListener("visibilitychange", function () {
       if (document.hidden) { clearTimeout(L.timer); setLiveBadge("paused"); }
-      else liveTick(); // refresh right away when the tab comes back
+      else if (navigator.onLine !== false) {
+        setLiveBadge(L.last ? (L.fails ? "retry" : "live") : "saved");
+        scheduleLiveTick();
+      }
     });
     window.addEventListener("online", liveTick);
     window.addEventListener("offline", function () { clearTimeout(L.timer); setLiveBadge("paused"); });

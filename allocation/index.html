@@ -7,30 +7,33 @@
   <meta name="description" content="KB Capital wallet allocation, holdings and recent fills.">
   <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self'; style-src 'self' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data:; connect-src 'self' https://data-api.polymarket.com https://clob.polymarket.com https://polygon.drpc.org https://1rpc.io https://polygon-bor-rpc.publicnode.com; base-uri 'none'; form-action 'none'">
   <meta name="referrer" content="no-referrer">
-  <meta name="color-scheme" content="dark">
-  <meta name="theme-color" content="#090e14">
+  <meta name="color-scheme" content="light">
+  <meta name="theme-color" content="#FFFFFF">
   <link rel="canonical" href="https://kbcap.fund/allocation/">
-  <link rel="icon" type="image/png" href="/favicon.png">
+  <link rel="icon" type="image/svg+xml" href="/gaussian.svg">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&amp;family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet">
   <link rel="stylesheet" href="/style.css?v=15">
   <link rel="stylesheet" href="/allocation/style.css?v=5">
   <link rel="stylesheet" href="/paper.css?v=6">
-  <link rel="stylesheet" href="/terminal.css?v=1">
+  <link rel="stylesheet" href="/brand.css">
+  <script src="/gaussian.js" defer></script>
+  <script src="/brand.js" defer></script>
   <script src="/terminal.js?v=1" defer></script>
 </head>
 <body class="record">
-  <main class="wrap">
-    <header class="fund-bar">
-      <a class="fund-name" href="/">KB Capital</a>
-      <nav aria-label="Portfolio sections">
+  <a class="skip" href="#main-content">Skip to content</a>
+  <header class="mast"><div class="mast-inner"><a class="wordmark" href="/"><kb-gaussian compact aria-hidden="true"><img src="/gaussian.svg" width="32" height="32" alt=""></kb-gaussian>kb capital</a>
+    <button type="button" class="menu" aria-controls="primary-nav" aria-expanded="false" hidden>Menu</button>
+    <nav id="primary-nav" aria-label="Primary navigation">
         <a href="/">About us</a>
         <a href="/predictions/">Track record</a>
         <a href="/allocation/" aria-current="page">Allocation</a>
         <a href="/calendar/">Calendar</a>
       </nav>
-    </header>
+  </div></header>
+  <main id="main-content" class="wrap">
     <div class="section-heading"><h1>Allocation</h1></div>
     <p id="status" role="status">Reading wallet balances…</p>
     <section class="panel daily-head"><h2>Today’s P&amp;L</h2>

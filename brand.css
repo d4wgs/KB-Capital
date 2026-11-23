@@ -1,0 +1,70 @@
+:root, body.record {
+  color-scheme: light;
+  --accent: #244FC4;
+  --text: #101114;
+  --muted: #64748B;
+  --surface: #EDF1FA;
+  --bg: #FFFFFF;
+  --green: #11643e;
+  --red: #a02731;
+  --border: #E3E7ED;
+  --body: var(--text);
+  --panel: var(--bg);
+  --blue: var(--accent);
+  --blue-hover: var(--accent);
+  --text-2: var(--muted);
+  --soft: var(--surface);
+  --hover: var(--surface);
+  --seg: var(--surface);
+  --sans: Inter, system-ui, sans-serif;
+  --mono: "IBM Plex Mono", ui-monospace, monospace;
+  --report-width: 1280px;
+  --report-gutter: clamp(1.25rem, 5vw, 4rem);
+  --r: 4px;
+  --space: 1rem;
+  --transition: 160ms ease;
+}
+html {scrollbar-gutter:stable;font-size:100%;scroll-padding-top:6rem}
+body {font:400 1rem/1.6 var(--sans);background:var(--bg);color:var(--text)}
+.wrap,.mast-inner,.foot {width:100%;max-width:var(--report-width);margin-inline:auto;padding-inline:var(--report-gutter)}
+body h1,body h2,body h3,.section-heading h1,.record .panel h2 {font-family:var(--sans);font-weight:600;letter-spacing:-.035em}
+a:focus-visible,body :focus-visible {outline:2px solid var(--accent);outline-offset:4px}
+.skip {position:fixed;left:1rem;top:-6rem;z-index:100;background:white;padding:.7rem}
+.skip:focus {top:.5rem}
+.mast {position:sticky;top:0;background:var(--bg);border-bottom:1px solid var(--border);z-index:25}
+.mast-inner,.footer-nav {display:flex;align-items:center;justify-content:space-between;gap:1rem}
+.mast-inner {min-height:4.25rem}
+.wordmark {display:inline-flex;align-items:baseline;gap:.4rem;font:600 1.42rem/1 "Helvetica Neue",Helvetica,sans-serif;letter-spacing:-.065em;color:var(--accent);text-decoration:none}
+.wordmark img {align-self:center}
+.wordmark kb-gaussian {display:block;align-self:center;width:32px;height:32px}
+.wordmark kb-gaussian svg {display:block;width:100%;height:100%}
+.mast nav,.footer-nav nav {display:flex;align-items:center;gap:clamp(1rem,3vw,2.5rem)}
+.mast nav a,.footer-nav nav a {font:500 .9rem/1.5 var(--sans);color:var(--text);text-decoration:none}
+.mast nav a {padding:1.45rem 0;border-bottom:2px solid transparent}
+.mast nav a[aria-current] {border-color:var(--accent);color:var(--accent)}
+.mast nav a:hover,.footer-nav a:hover {color:var(--accent)}
+.menu {font:500 .9rem var(--sans);background:var(--bg);border:1px solid var(--border);border-radius:var(--r);padding:.65rem 1rem}
+.mast [hidden] {display:none}
+.record .panel {border:1px solid var(--border);border-radius:var(--r)}
+.record :is(dd,.big,.pl-value,.cal-sum b,.day .p,.holding-comparison b,.pl-chart text,#daily-return,#daily-money,.holding-fields b,#legend strong,.ring-center strong,td) {font-family:var(--mono);font-variant-numeric:tabular-nums}
+.record .ranges button.on {background:var(--accent)}
+.metric-help {display:inline-block;margin-left:.3rem}
+.metric-help button {cursor:help;background:white;color:var(--muted);border:1px solid var(--muted);border-radius:50%;width:1.2rem;height:1.2rem;padding:0}
+.metric-note {position:fixed;z-index:50;width:min(17rem,95vw);background:var(--bg);border:1px solid var(--border);border-left:2px solid var(--accent);padding:.8rem;color:var(--text);font:400 .85rem/1.5 var(--sans)}
+@media(max-width:680px){
+ .mast-inner {flex-wrap:wrap;padding-block:.65rem;min-height:3.75rem}
+ .mast nav {flex-basis:100%;flex-wrap:wrap;gap:.3rem 1.2rem}
+ .mast nav a {padding:.65rem 0}
+ .footer-nav {align-items:flex-start;flex-direction:column}
+ .footer-nav nav {flex-wrap:wrap}
+}
+@media(prefers-reduced-motion:reduce){:root{--transition:0s}}
+
+.table.act .play-summary {display:grid;grid-template-columns:auto minmax(0,1fr) auto auto;align-items:center;gap:.75rem;cursor:pointer;padding-block:.85rem}
+.play-summary::-webkit-details-marker {display:none}
+.play-summary .fill-count,.play-totals {font:400 .85rem/1.5 var(--mono);color:var(--muted)}
+.play-chevron {color:var(--accent)}
+.play[open] > summary .play-chevron {transform:rotate(180deg)}
+.play[open] > summary {background:var(--surface)}
+.play-fills {margin-inline-start:clamp(.25rem,2vw,2rem);border-left:1px solid var(--border);padding-left:.5rem}
+.play-totals {padding:.8rem .25rem 0}

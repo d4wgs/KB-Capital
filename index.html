@@ -7,49 +7,54 @@
   <meta name="description" content="KB Capital is a private, self-funded fund trading event contracts on Polymarket, only where its own research gives it an informational edge.">
   <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self'; style-src 'self' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data:; base-uri 'none'; form-action 'none'">
   <meta name="referrer" content="no-referrer">
-  <meta name="color-scheme" content="dark">
-  <meta name="theme-color" content="#090e14">
+  <meta name="color-scheme" content="light">
+  <meta name="theme-color" content="#FFFFFF">
   <meta property="og:title" content="KB Capital | Private event-contract fund">
   <meta property="og:image" content="https://kbcap.fund/favicon.png">
   <meta property="og:description" content="A private, self-funded fund trading event contracts on Polymarket, only where its own research gives it an informational edge.">
   <link rel="canonical" href="https://kbcap.fund/">
-  <link rel="icon" type="image/png" href="/favicon.png">
+  <link rel="icon" type="image/svg+xml" href="/gaussian.svg">
   <link rel="apple-touch-icon" href="/favicon.png">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&family=Open+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&amp;family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet">
   <link rel="stylesheet" href="/about.css?v=6">
-  <link rel="stylesheet" href="/paper.css?v=6">
-  <link rel="stylesheet" href="/terminal.css?v=1">
+  <script src="/gaussian.js" defer></script>
+  <link rel="stylesheet" href="/brand.css">
+  <script src="/brand.js" defer></script>
   <script src="/terminal.js?v=1" defer></script>
 </head>
 <body>
-  <!-- Top bar (same as the Predictions and Calendar pages) -->
-  <div class="wrap"><header class="fund-bar">
-      <a class="fund-name" href="/">KB Capital</a>
-      <nav aria-label="Portfolio sections">
+  <a class="skip" href="#main-content">Skip to content</a>
+  <header class="mast"><div class="mast-inner"><a class="wordmark" href="/"><kb-gaussian compact aria-hidden="true"><img src="/gaussian.svg" width="32" height="32" alt=""></kb-gaussian>kb capital</a>
+    <button type="button" class="menu" aria-controls="primary-nav" aria-expanded="false" hidden>Menu</button>
+    <nav id="primary-nav" aria-label="Primary navigation">
         <a href="/" aria-current="page">About us</a>
         <a href="/predictions/">Track record</a>
         <a href="/allocation/">Allocation</a>
         <a href="/calendar/">Calendar</a>
       </nav>
-    </header><div class="section-heading"><div><h1>About us</h1></div></div></div>
-  <main>
+  </div></header>
+  <main id="main-content">
     <section class="hero" aria-labelledby="h-hero">
       <div class="wrap hero-in">
-        <h2 id="h-hero">We trade event contracts on Polymarket, and only where our own research gives us an edge.</h2>
-        <p class="lede">KB Capital is a private, self-funded fund with two principals. We take high-conviction positions on the high-probability side of a market and aim to be out within about an hour. We are not accepting outside capital.</p>
+        <div class="plot"><kb-gaussian role="img" aria-label="KB Capital"></kb-gaussian></div>
+        <h1 id="h-hero">An edge in uncertainty.</h1>
+        <p class="lede">We trade event contracts on Polymarket when our research identifies an informational edge on the high-probability side of a market.</p>
+        <div class="actions"><a href="/predictions/">View track record</a><a href="#process">Our methodology</a></div>
       </div>
     </section>
 
     <!-- Key figures -->
     <section class="figures" aria-label="Key figures">
       <div class="wrap">
+        <h2>Trading objectives</h2>
+        <p>KB Capital is a private, self-funded fund with two principals. We are not accepting outside capital.</p>
         <dl class="figs">
           <div><dt>Target return per day, on NAV<span class="metric-help"><button type="button" aria-expanded="false" aria-label="Explain Target return per day, on NAV" data-help="The target is measured against the entire opening portfolio, including undeployed cash.">?</button></span></dt><dd>1%</dd></div>
           <div><dt>Target holding period</dt><dd>~1 hr</dd></div>
-          <div><dt>Trades per day</dt><dd>1&ndash;2</dd></div>
-          <div><dt>Illustrative annualized, 1.01<sup>365</sup></dt><dd>37.8x*</dd></div>
+          <div><dt>Target trades per day</dt><dd>1&ndash;2</dd></div>
+          <div><dt>Illustrative multiple, 1.01<sup>365</sup></dt><dd>37.8x*</dd></div>
         </dl>
         <p class="fine">*Illustrative only. 1.01<sup>365</sup> &asymp; 37.8x assumes a 1% net gain every calendar day on total fund capital (NAV), full reinvestment of proceeds, and no drawdowns, fees or slippage. Prediction markets trade around the clock, so we compound on a 365-day basis. This is a target, not a forecast or a guarantee. Actual results will vary and capital is at risk.</p>
       </div>
@@ -131,7 +136,7 @@
     <!-- Process -->
     <section class="sec" id="process" aria-labelledby="h-process">
       <div class="wrap sec-in">
-        <h2 id="h-process">Process</h2>
+        <h2 id="h-process">Methodology</h2>
         <div class="sec-body">
           <ol class="process">
             <li>
@@ -204,7 +209,7 @@
     <!-- Risk -->
     <section class="sec" id="risk" aria-labelledby="h-risk">
       <div class="wrap sec-in">
-        <h2 id="h-risk">Risk</h2>
+        <h2 id="h-risk">Risk management</h2>
         <div class="sec-body prose">
           <h3>Fixed exits</h3>
           <p>Every position has a maximum drawdown and a time window defined before entry, so the exit is decided before the price starts moving.</p>
@@ -221,30 +226,15 @@
     <!-- FAQ -->
     <section class="sec" id="faq" aria-labelledby="h-faq">
       <div class="wrap sec-in">
-        <h2 id="h-faq">Questions</h2>
+        <h2 id="h-faq">Frequently asked questions</h2>
         <div class="sec-body">
-          <dl class="qa">
-            <div>
-              <dt>What is the strategy?</dt>
-              <dd>We trade event contracts on Polymarket, on the high-probability side of markets where our research gives us an edge. We aim for one to two trades a day, each opened and closed within about an hour.</dd>
-            </div>
-            <div>
-              <dt>What does the 1% target mean?</dt>
-              <dd>It is our target return per day on total fund capital (NAV), not only on the capital deployed that day. Compounded daily for 365 days it comes to about 37.8x. That is an illustration and assumes no drawdowns, fees or slippage.</dd>
-            </div>
-            <div>
-              <dt>Is the fund open to outside investors?</dt>
-              <dd>No. KB Capital is private and self-funded, and we are not accepting outside capital.</dd>
-            </div>
-            <div>
-              <dt>How do you manage risk?</dt>
-              <dd>Position size, maximum drawdown and a time window are set before entry, and we hold cash when we have no edge.</dd>
-            </div>
-            <div>
-              <dt>Where can I see performance?</dt>
-              <dd>Positions, trade activity and profit and loss are public on the <a href="/predictions/">Track record</a> page, sourced from Polymarket&rsquo;s public data.</dd>
-            </div>
-          </dl>
+          <div class="qa">
+            <details><summary>What is the strategy?</summary><p>We trade event contracts on Polymarket, on the high-probability side of markets where our research gives us an edge. We aim for one to two trades a day, each opened and closed within about an hour.</p></details>
+            <details><summary>What does the 1% target mean?</summary><p>It is our target return per day on total fund capital (NAV), not only on the capital deployed that day. Compounded daily for 365 days it comes to about 37.8x. That is an illustration and assumes no drawdowns, fees or slippage.</p></details>
+            <details><summary>Is the fund open to outside investors?</summary><p>No. KB Capital is private and self-funded, and we are not accepting outside capital.</p></details>
+            <details><summary>How do you manage risk?</summary><p>Position size, maximum drawdown and a time window are set before entry, and we hold cash when we have no edge.</p></details>
+            <details><summary>Where can I see performance?</summary><p>Positions, trade activity and profit and loss are public on the <a href="/predictions/">Track record</a> page, sourced from Polymarket&rsquo;s public data.</p></details>
+          </div>
         </div>
       </div>
     </section>
@@ -259,6 +249,12 @@
 
   <footer class="site-footer">
     <div class="wrap">
+      <div class="footer-nav"><a class="wordmark" href="/"><img src="/gaussian.svg" width="32" height="32" alt="">kb capital</a><nav aria-label="Footer navigation">
+        <a href="/" aria-current="page">About us</a>
+        <a href="/predictions/">Track record</a>
+        <a href="/allocation/">Allocation</a>
+        <a href="/calendar/">Calendar</a>
+      </nav></div>
       <p>&copy; 2026 KB Capital. A private portfolio of personal funds. Not accepting outside capital. Return targets and compounding figures are hypothetical, are not guarantees, and do not reflect fees, slippage or losses. Trading event contracts involves substantial risk of loss. Past results do not predict future results. For informational purposes only; nothing here is investment advice, an offer to sell, or a solicitation of an offer to buy any security or interest in any fund. Not affiliated with Polymarket.</p>
     </div>
   </footer>
