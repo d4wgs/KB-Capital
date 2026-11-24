@@ -1,5 +1,5 @@
 {
- "updated": "2026-11-23T12:13:14Z",
+ "updated": "2026-11-24T00:02:09Z",
  "periods": [
   {
    "t": 1794884911.0,
@@ -32,10 +32,10 @@
    "net_deposits": 682.334496,
    "pnl_start": 36.375638,
    "start_value": 718.710134,
-   "end_pnl": 36.375638,
-   "end_value": 711.60629,
-   "gain": 0.0,
-   "return": 0.0
+   "end_pnl": 25.709706,
+   "end_value": 708.0323,
+   "gain": -10.665932,
+   "return": -0.014840380697901782
   }
  ],
  "capital_flows": [
@@ -69,33 +69,33 @@
   }
  ],
  "wallet": "0x03e1859bcc5293ff3e2c4e9cb483dc76048d5f2d",
- "total_value": 711.6062900000001,
- "positions_value": 30.6167,
- "cash": 680.98959,
+ "total_value": 708.0323,
+ "positions_value": 0.0,
+ "cash": 708.0323,
  "trade_delay_hours": 0.0,
  "metrics": {
-  "closed_count": 4,
-  "wins": 4,
+  "closed_count": 5,
+  "wins": 5,
   "losses": 0,
   "win_rate": 1.0,
-  "avg_win": 2.7451749999999997,
+  "avg_win": 5.14194,
   "avg_loss": null,
   "profit_factor": null,
-  "best": 5.3999,
+  "best": 14.729,
   "worst": 1.0608,
-  "best_title": "Anthropic IPO closing market cap above $1.1T?",
+  "best_title": "Anthropic: Above IPO Price at End of First Month?",
   "worst_title": "Canadiens vs. Rangers",
-  "realized_pnl": 33.7619,
-  "unrealized_pnl": -4.4805,
-  "total_pnl": 29.281399999999998,
-  "open_count": 1,
-  "open_cost": 35.0971,
-  "largest_position_pct": 0.9999967338086729,
+  "realized_pnl": 25.709699999999998,
+  "unrealized_pnl": 0,
+  "total_pnl": 25.709699999999998,
+  "open_count": 0,
+  "open_cost": 0,
+  "largest_position_pct": null,
   "markets_traded": 5,
-  "volume_usdc": 929.839886,
-  "trade_count": 16,
+  "volume_usdc": 957.327686,
+  "trade_count": 19,
   "net_deposits": 682.334496,
-  "pnl_vs_deposits": 29.271794000000114,
-  "time_weighted_return": 0.1263491232175813
+  "pnl_vs_deposits": 25.69780400000002,
+  "time_weighted_return": 0.10963367343028452
  }
 }

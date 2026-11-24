@@ -1,5 +1,27 @@
 [
  {
+  "title": "Anthropic: Above IPO Price at End of First Month?",
+  "slug": "anthropic-ipo-above-ipo-price-at-end-of-first-month",
+  "event_slug": "anthropic-ipo-above-ipo-price-at-end-of-first-month",
+  "outcome": "Down",
+  "status": "CLOSED",
+  "size": 0.0047,
+  "total_size": 213.0,
+  "avg_price": 0.47,
+  "current_price": 0.475,
+  "cost": 0.0022,
+  "value": 0.0022,
+  "realized_pnl": 14.729,
+  "unrealized_pnl": 0.0,
+  "total_pnl": 14.729,
+  "percent_pnl": 0.0,
+  "end_date": "2026-12-01",
+  "opened": "2026-11-20T19:32:17Z",
+  "last_activity": "2026-11-23T15:42:49Z",
+  "condition_id": "0xddfe2bd93341f59585239a2c771e23fc0e7ae4595049c6e50494c48aac0c3d72",
+  "token_id": "73907667086812556494284430569654881771170554798809383394811042681537293950058"
+ },
+ {
   "title": "Will IShowSpeed finish GTA VI by November 21, 11:59 AM ET?",
   "slug": "will-ishowspeed-finish-gta-vi-by-november-21-1159-am-et",
   "event_slug": "ishowspeed-finishes-gta-vi-by",
