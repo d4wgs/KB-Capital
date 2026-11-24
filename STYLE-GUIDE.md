@@ -1,6 +1,6 @@
 # KB Capital workspace style guide
 
-The workspace organizes financial monitoring and research around a fixed navigation rail and a single content column. Each page starts with a category breadcrumb and a compact title. The sidebar uses the static Gaussian symbol. About us retains the animated Gaussian wordmark.
+The workspace organizes financial monitoring and research around a fixed navigation rail and a single content column. Each page starts with a category breadcrumb and a compact title. The sidebar animates the three Gaussian curves beside a stationary wordmark and respects reduced-motion preferences. About us retains the animated Gaussian wordmark.
 
 | Element | Convention |
 | --- | --- |

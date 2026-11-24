@@ -7,11 +7,11 @@
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&amp;family=Inter:wght@400;500;600;700&amp;display=swap">
 {% for style in page.styles %}<link rel="stylesheet" href="/{{ style }}">{% endfor %}
 <link rel="stylesheet" href="/brand.css"><link rel="stylesheet" href="/workspace.css">
-<script defer src="/brand.js"></script><script defer src="/terminal.js"></script>
+<script defer src="/gaussian.js"></script><script defer src="/brand.js"></script><script defer src="/terminal.js"></script>
 {% for script in page.scripts %}<script defer src="/{{ script }}"></script>{% endfor %}
 </head><body class="{{ page.body_class }} workspace">
 <a class="skip" href="#main-content">Skip to content</a>
-<aside id="sidebar"><a class="wordmark" href="/" aria-label="KB Capital"><img width="30" height="30" src="/gaussian.svg" alt=""><span>kb capital</span></a>
+<aside id="sidebar"><a class="wordmark" href="/" aria-label="KB Capital"><kb-gaussian compact aria-hidden="true"><img width="32" height="32" src="/gaussian.svg" alt=""></kb-gaussian><span>kb capital</span></a>
 <nav aria-label="Workspace pages">{% for group in groups %}{% set entries=pages|selectattr('category','equalto',group)|list %}{% if entries %}<h2>{{ group }}</h2>{% for item in entries %}<a data-category="{{ group }}" href="{{ item.route }}" title="{{ item.label }}" aria-label="{{ item.label }}" {% if page.route==item.route %}aria-current="page"{% endif %}>{{ ui.Icon(item.icon) }}<span>{{ item.label }}</span></a>{% endfor %}{% endif %}{% endfor %}</nav>
 </aside>
 <div class="work-area"><div class="workspace-bar">

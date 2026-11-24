@@ -18,7 +18,7 @@ class Page:
 
 PAGES = (
     Page("/", "About us", "overview", "Fund", "about", styles=("about.css",),
-         scripts=("gaussian.js",), body_class="about"),
+         body_class="about"),
     Page("/predictions/", "Track record", "trend", "Fund", "record",
          styles=("style.css", "paper.css"), scripts=("wallet-api.js", "script.js"), body_class="record portfolio"),
     Page("/allocation/", "Allocation", "allocation", "Fund", "allocation",

@@ -29,7 +29,7 @@ def build(destination, showcase=False):
     css = env.get_template("tokens.css").render() + env.get_template("workspace.css").render(mobile_width=800)
     (destination / "workspace.css").write_text(css, encoding="utf-8")
     if destination != ROOT:
-        assets = {"brand.css", "brand.js", "terminal.js", "gaussian.svg", "favicon.png"}
+        assets = {"brand.css", "brand.js", "terminal.js", "gaussian.svg", "gaussian.js", "favicon.png"}
         for page in pages:
             assets.update((*page.styles, *page.scripts))
         for asset in [*(ROOT / name for name in assets), *(ROOT / "data").glob("*.json")]:
