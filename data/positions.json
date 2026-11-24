@@ -1,1 +1,46 @@
-[]
+[
+ {
+  "title": "Will Elon Musk post 280-299 tweets from November 20 to November 27, 2026?",
+  "slug": "elon-musk-of-tweets-november-20-november-27-2026-280-299",
+  "event_slug": "elon-musk-of-tweets-november-20-november-27-2026",
+  "outcome": "Yes",
+  "status": "OPEN",
+  "size": 25.0,
+  "total_size": 25.0,
+  "avg_price": 0.18,
+  "current_price": 0.185,
+  "cost": 4.5,
+  "value": 4.625,
+  "realized_pnl": 0.0,
+  "unrealized_pnl": 0.125,
+  "total_pnl": 0.125,
+  "percent_pnl": 2.7777,
+  "end_date": "2026-11-27",
+  "opened": "2026-11-24T05:46:04Z",
+  "last_activity": "2026-11-24T05:46:04Z",
+  "condition_id": "0x3e89305c157a8dfba4eea5e1a0ac3d2a3ccd8ad968c97508756dc509cc7d7a6f",
+  "token_id": "42046158069770265207095263010721935099046067389868713146067575571115467407846"
+ },
+ {
+  "title": "Will Elon Musk post 300-319 tweets from November 20 to November 27, 2026?",
+  "slug": "elon-musk-of-tweets-november-20-november-27-2026-300-319",
+  "event_slug": "elon-musk-of-tweets-november-20-november-27-2026",
+  "outcome": "Yes",
+  "status": "OPEN",
+  "size": 20.0,
+  "total_size": 20.0,
+  "avg_price": 0.17,
+  "current_price": 0.15,
+  "cost": 3.4,
+  "value": 3.0,
+  "realized_pnl": 0.0,
+  "unrealized_pnl": -0.4,
+  "total_pnl": -0.4,
+  "percent_pnl": -11.7647,
+  "end_date": "2026-11-27",
+  "opened": "2026-11-24T05:42:38Z",
+  "last_activity": "2026-11-24T05:42:38Z",
+  "condition_id": "0xbf3c12f2215fdc302fa1bc219827b1074738c8b607bb87fcbdbbac17a3a59d1a",
+  "token_id": "28571745087838676848044211711285052588481070197477326199912112298791475021596"
+ }
+]
