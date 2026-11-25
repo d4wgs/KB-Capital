@@ -1,5 +1,5 @@
 {
- "updated": "2026-11-25T13:36:30Z",
+ "updated": "2026-11-25T22:43:47Z",
  "periods": [
   {
    "t": 1794884911.0,
@@ -32,10 +32,10 @@
    "net_deposits": 682.334496,
    "pnl_start": 36.375638,
    "start_value": 718.710134,
-   "end_pnl": 25.635208,
-   "end_value": 707.5573,
-   "gain": -10.74043,
-   "return": -0.01494403583851512
+   "end_pnl": 26.707233,
+   "end_value": 709.52181,
+   "gain": -9.668405,
+   "return": -0.013452440062574664
   }
  ],
  "capital_flows": [
@@ -69,9 +69,9 @@
   }
  ],
  "wallet": "0x03e1859bcc5293ff3e2c4e9cb483dc76048d5f2d",
- "total_value": 707.5573,
- "positions_value": 17.975,
- "cash": 689.5823,
+ "total_value": 709.52181,
+ "positions_value": 45.5908,
+ "cash": 663.93101,
  "trade_delay_hours": 0.0,
  "metrics": {
   "closed_count": 5,
@@ -86,16 +86,16 @@
   "best_title": "Anthropic: Above IPO Price at End of First Month?",
   "worst_title": "Canadiens vs. Rangers",
   "realized_pnl": 25.709699999999998,
-  "unrealized_pnl": -0.47490000000000004,
-  "total_pnl": 25.234799999999996,
-  "open_count": 3,
-  "open_cost": 18.4499,
-  "largest_position_pct": 0.45897079276773295,
-  "markets_traded": 8,
-  "volume_usdc": 975.777685,
-  "trade_count": 24,
+  "unrealized_pnl": 1.5908999999999998,
+  "total_pnl": 27.3006,
+  "open_count": 4,
+  "open_cost": 43.9997,
+  "largest_position_pct": 0.35643156075348537,
+  "markets_traded": 9,
+  "volume_usdc": 1001.327686,
+  "trade_count": 28,
   "net_deposits": 682.334496,
-  "pnl_vs_deposits": 25.22280400000011,
-  "time_weighted_return": 0.10951692155353765
+  "pnl_vs_deposits": 27.187314000000015,
+  "time_weighted_return": 0.11119697914796323
  }
 }
