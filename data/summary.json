@@ -1,5 +1,5 @@
 {
- "updated": "2026-11-27T14:54:45Z",
+ "updated": "2026-11-27T23:22:37Z",
  "periods": [
   {
    "t": 1794884911.0,
@@ -32,10 +32,10 @@
    "net_deposits": 682.334496,
    "pnl_start": 36.375638,
    "start_value": 718.710134,
-   "end_pnl": 37.422771,
-   "end_value": 719.84501,
-   "gain": 1.047133,
-   "return": 0.0014569615070990432
+   "end_pnl": 39.571961,
+   "end_value": 721.89501,
+   "gain": 3.196323,
+   "return": 0.004447304760002173
   }
  ],
  "capital_flows": [
@@ -69,33 +69,33 @@
   }
  ],
  "wallet": "0x03e1859bcc5293ff3e2c4e9cb483dc76048d5f2d",
- "total_value": 719.84501,
- "positions_value": 48.7,
- "cash": 671.14501,
+ "total_value": 721.89501,
+ "positions_value": 0.0,
+ "cash": 721.89501,
  "trade_delay_hours": 0.0,
  "metrics": {
-  "closed_count": 7,
-  "wins": 5,
-  "losses": 2,
-  "win_rate": 0.7142857142857143,
-  "avg_win": 5.14194,
-  "avg_loss": -7.293200000000001,
-  "profit_factor": 1.7625802117040528,
-  "best": 14.729,
-  "worst": -7.9981,
-  "best_title": "Anthropic: Above IPO Price at End of First Month?",
-  "worst_title": "Will Elon Musk post 300-319 tweets from November 20 to November 27, 2026?",
-  "realized_pnl": 11.123299999999999,
-  "unrealized_pnl": 26.4,
-  "total_pnl": 37.5233,
-  "open_count": 2,
-  "open_cost": 22.2999,
-  "largest_position_pct": 0.8203285420944558,
+  "closed_count": 9,
+  "wins": 6,
+  "losses": 3,
+  "win_rate": 0.6666666666666666,
+  "avg_win": 10.776616666666667,
+  "avg_loss": -8.3624,
+  "profit_factor": 2.577398035651647,
+  "best": 38.95,
+  "worst": -10.5,
+  "best_title": "Will Elon Musk post 240-259 tweets from November 20 to November 27, 2026?",
+  "worst_title": "Will Elon Musk post 260-279 tweets from November 20 to November 27, 2026?",
+  "realized_pnl": 39.572500000000005,
+  "unrealized_pnl": 0,
+  "total_pnl": 39.572500000000005,
+  "open_count": 0,
+  "open_cost": 0,
+  "largest_position_pct": null,
   "markets_traded": 9,
-  "volume_usdc": 1008.553446,
-  "trade_count": 32,
+  "volume_usdc": 1059.303445,
+  "trade_count": 34,
   "net_deposits": 682.334496,
-  "pnl_vs_deposits": 37.51051400000006,
-  "time_weighted_return": 0.1279901705336639
+  "pnl_vs_deposits": 39.56051400000001,
+  "time_weighted_return": 0.13135834103469124
  }
 }
