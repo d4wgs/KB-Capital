@@ -1,5 +1,57 @@
 [
  {
+  "time": "2026-11-27T02:38:12Z",
+  "type": "TRADE",
+  "side": "SELL",
+  "title": "Will Elon Musk post 280-299 tweets from November 20 to November 27, 2026?",
+  "slug": "elon-musk-of-tweets-november-20-november-27-2026-280-299",
+  "event_slug": "elon-musk-of-tweets-november-20-november-27-2026",
+  "outcome": "Yes",
+  "shares": 9.11,
+  "usdc": 1.0932,
+  "price": 0.12,
+  "tx": "0xb34f4956c9415234b2082ebeaf31446711df47e1ac88934f0cc7a53c86fecd53"
+ },
+ {
+  "time": "2026-11-27T02:37:29Z",
+  "type": "TRADE",
+  "side": "SELL",
+  "title": "Will Elon Musk post 280-299 tweets from November 20 to November 27, 2026?",
+  "slug": "elon-musk-of-tweets-november-20-november-27-2026-280-299",
+  "event_slug": "elon-musk-of-tweets-november-20-november-27-2026",
+  "outcome": "Yes",
+  "shares": 16.666667,
+  "usdc": 2.0,
+  "price": 0.1199999976,
+  "tx": "0xfa7ac57ac16dc77cc7ce98f357f5a13ef50a9801ca9e327e2be4f84903b1cb06"
+ },
+ {
+  "time": "2026-11-27T02:14:09Z",
+  "type": "TRADE",
+  "side": "SELL",
+  "title": "Will Elon Musk post 280-299 tweets from November 20 to November 27, 2026?",
+  "slug": "elon-musk-of-tweets-november-20-november-27-2026-280-299",
+  "event_slug": "elon-musk-of-tweets-november-20-november-27-2026",
+  "outcome": "Yes",
+  "shares": 24.39,
+  "usdc": 2.9268,
+  "price": 0.12,
+  "tx": "0xe02a6160e8ce4c18b9f44956a896e78720214e680b5790755c0d1dbd78ebb427"
+ },
+ {
+  "time": "2026-11-27T02:10:09Z",
+  "type": "TRADE",
+  "side": "SELL",
+  "title": "Will Elon Musk post 300-319 tweets from November 20 to November 27, 2026?",
+  "slug": "elon-musk-of-tweets-november-20-november-27-2026-300-319",
+  "event_slug": "elon-musk-of-tweets-november-20-november-27-2026",
+  "outcome": "Yes",
+  "shares": 50.24,
+  "usdc": 1.194,
+  "price": 0.024,
+  "tx": "0xd3e35734b6f554e322820a12d7ca36e86221a7c1358b59c06657f3b298f10f17"
+ },
+ {
   "time": "2026-11-25T20:59:07Z",
   "type": "TRADE",
   "side": "BUY",

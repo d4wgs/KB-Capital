@@ -1,5 +1,5 @@
 {
- "updated": "2026-11-26T23:05:44Z",
+ "updated": "2026-11-27T04:57:18Z",
  "periods": [
   {
    "t": 1794884911.0,
@@ -32,10 +32,10 @@
    "net_deposits": 682.334496,
    "pnl_start": 36.375638,
    "start_value": 718.710134,
-   "end_pnl": 29.774802,
-   "end_value": 714.54911,
-   "gain": -6.600836,
-   "return": -0.009184281239034264
+   "end_pnl": 32.37417,
+   "end_value": 716.99501,
+   "gain": -4.001468,
+   "return": -0.005567568635396482
   }
  ],
  "capital_flows": [
@@ -69,33 +69,33 @@
   }
  ],
  "wallet": "0x03e1859bcc5293ff3e2c4e9cb483dc76048d5f2d",
- "total_value": 714.54911,
- "positions_value": 50.6181,
- "cash": 663.93101,
+ "total_value": 716.99501,
+ "positions_value": 45.85,
+ "cash": 671.14501,
  "trade_delay_hours": 0.0,
  "metrics": {
-  "closed_count": 5,
+  "closed_count": 7,
   "wins": 5,
-  "losses": 0,
-  "win_rate": 1.0,
+  "losses": 2,
+  "win_rate": 0.7142857142857143,
   "avg_win": 5.14194,
-  "avg_loss": null,
-  "profit_factor": null,
+  "avg_loss": -7.293200000000001,
+  "profit_factor": 1.7625802117040528,
   "best": 14.729,
-  "worst": 1.0608,
+  "worst": -7.9981,
   "best_title": "Anthropic: Above IPO Price at End of First Month?",
-  "worst_title": "Canadiens vs. Rangers",
-  "realized_pnl": 25.709699999999998,
-  "unrealized_pnl": 6.6183000000000005,
-  "total_pnl": 32.327999999999996,
-  "open_count": 4,
-  "open_cost": 43.9997,
-  "largest_position_pct": 0.5037723660113675,
+  "worst_title": "Will Elon Musk post 300-319 tweets from November 20 to November 27, 2026?",
+  "realized_pnl": 11.123299999999999,
+  "unrealized_pnl": 23.55,
+  "total_pnl": 34.6733,
+  "open_count": 2,
+  "open_cost": 22.2999,
+  "largest_position_pct": 0.5725190839694656,
   "markets_traded": 9,
-  "volume_usdc": 1001.327686,
-  "trade_count": 28,
+  "volume_usdc": 1008.553446,
+  "trade_count": 32,
   "net_deposits": 682.334496,
-  "pnl_vs_deposits": 32.2146140000001,
-  "time_weighted_return": 0.11600441609661138
+  "pnl_vs_deposits": 34.660514000000035,
+  "time_weighted_return": 0.12007809716664863
  }
 }
